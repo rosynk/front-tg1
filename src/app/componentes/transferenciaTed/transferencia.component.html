@@ -1,0 +1,177 @@
+<div class="db-wrap">
+
+  <<!-- Sidebar -->
+  <!-- Sidebar -->
+  <aside class="db-sidebar">
+    <div class="db-brand">Bizi Bank</div>
+
+    <div class="db-user">
+      <div class="db-avatar">{{ (extrato?.titular || 'U')[0].toUpperCase() }}</div>
+      <div>
+          <div class="db-user-name">{{ conta?.usuario?.nomeCompleto || 'Carregando...' }}</div>
+          <div class="db-user-tag">Cofre Premium · Verificado</div>
+      </div>
+      </div>
+
+    <nav class="db-nav">
+      <span class="db-nav-section">Main</span>
+      <a class="db-nav-item active">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Accounts
+      </a>
+       <a class="db-nav-item" routerLink="/transferencia-pix" style="cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3L3 12l9 9 9-9-9-9z" />
+              <path d="M9 12l3-3 3 3-3 3-3-3z" />
+        </svg>
+         <span style="margin-left: 8px;">Pix</span>
+              </a>
+
+      <a class="db-nav-item" routerLink="/extrato" style="cursor: pointer;">
+           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <line x1="8" y1="6" x2="21" y2="6"></line>
+             <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+             <line x1="3" y1="6" x2="3.01" y2="6"></line>
+             <line x1="3" y1="12" x2="3.01" y2="12"></line>
+             <line x1="3" y1="18" x2="3.01" y2="18"></line>
+         </svg>
+           <span style="margin-left: 8px;">Extrato</span>
+       </a>
+
+
+      <a class="db-nav-item" routerLink="/transferencia" style="cursor: pointer;">
+           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+           <path d="M5 12h14M12 5l7 7-7 7"/>
+       </svg>
+         Transferir (DOC/TED)
+       </a>
+      <a class="db-nav-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+        Boletos
+      </a>
+
+      <span class="db-nav-section" style="margin-top: 8px;">Conta</span>
+      <a class="db-nav-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Perfil
+      </a>
+      <a class="db-nav-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 0v4m0 12v2m-8-10H2m20 0h-2"/></svg>
+        Configurações
+      </a>
+    </nav>
+
+    <div class="db-sidebar-footer">
+      <button class="db-btn-quick">Quick Transfer</button>
+      <a class="db-sidebar-help">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+        Precisa de ajuda?
+      </a>
+    </div>
+  </aside>
+
+  <header class="db-topbar">
+    <nav class="db-topbar-nav">
+      <a href="#">Produtos</a>
+      <a href="#">Segurança</a>
+      <a href="#">Suporte</a>
+    </nav>
+    <div class="db-topbar-right">
+      <div class="db-search">
+        <svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar..." />
+      </div>
+      <!-- CORREÇÃO: Chamando o logout real ao sair -->
+      <button class="db-btn-login" (click)="authService.logout()" routerLink="/login">Sair</button>
+    </div>
+  </header>
+
+  <main class="db-main">
+
+    <div class="db-hero">
+      <div>
+        <p class="db-balance-label">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Saldo disponível para envio
+        </p>
+        <!-- SEÇÃO CORRIGIDA: Validação de nulo para o pipe de Currency -->
+        <h1 class="db-balance-val">
+          {{ (extrato && extrato.saldoAtual != null) ? (extrato.saldoAtual | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00' }}
+        </h1>
+        <div class="db-acct-info" *ngIf="conta">
+          <span>Origem: Ag. {{ conta.numeroAgencia }}</span>
+          <span class="db-acct-sep">·</span>
+          <span>Cc. {{ conta.numeroConta }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="db-activity">
+      <div class="db-activity-head">
+        <h2>Nova Transferência TED</h2>
+      </div>
+
+      <div *ngIf="msgSucesso" class="alert-success" style="color: #10b981; margin-bottom: 15px; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px;">{{ msgSucesso }}</div>
+      <div *ngIf="msgErro" class="alert-error" style="color: #ef4444; margin-bottom: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;">{{ msgErro }}</div>
+
+      <div class="transfer-container" style="display: flex; flex-direction: column; gap: 20px;">
+
+        <div class="input-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+          <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Agência</label>
+            <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
+               <input type="text" [(ngModel)]="transferenciaData.agenciaDestino" placeholder="0001" maxlength="4" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
+            </div>
+          </div>
+
+          <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Conta de Destino</label>
+            <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
+                <input type="text" [(ngModel)]="transferenciaData.numeroContaDestino" placeholder="12345-6" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
+            </div>
+          </div>
+        </div>
+
+        <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Valor (R$)</label>
+          <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
+            <input type="number" [(ngModel)]="transferenciaData.valor" placeholder="0,00" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
+          </div>
+        </div>
+
+        <button class="db-btn-send"
+                [disabled]="loadingTransfer"
+                (click)="enviarTransferencia()"
+                style="background: #10b981; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+          <span *ngIf="!loadingTransfer">Confirmar e Enviar TED</span>
+          <span *ngIf="loadingTransfer">Processando...</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="db-right">
+    <p class="db-right-title">Segurança</p>
+    <div class="db-vault">
+      <div class="db-vault-head">
+        <svg width="14" height="14" fill="rgba(163,230,192,0.8)" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Dica de Ouro
+      </div>
+      <p class="db-vault-desc">O TED é processado em dias úteis. Confira os dados antes de confirmar, pois esta operação não pode ser revertida.</p>
+      <div class="db-vault-status">
+        <span class="db-status-lbl">Criptografia</span>
+        <span class="db-status-badge">AES-256</span>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="db-footer">
+    <div class="db-footer-brand">
+      <strong>Bizi Bank</strong>
+      <small>© 2026 Bizi Bank. Instituição financeira regulamentada.</small>
+    </div>
+  </footer>
+
+</div>

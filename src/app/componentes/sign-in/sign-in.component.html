@@ -47,15 +47,17 @@
       <div class="step-header">
         <div class="step-info">
           <span class="step-label" [ngSwitch]="currentStep">
-            <ng-container *ngSwitchCase="1">STEP 01 OF 04</ng-container>
-            <ng-container *ngSwitchCase="2">STEP 02 OF 04</ng-container>
-            <ng-container *ngSwitchCase="3">STEP 03 OF 04</ng-container>
-            <ng-container *ngSwitchCase="4">STEP 04 OF 04</ng-container>
+            <ng-container *ngSwitchCase="1">STEP 01 OF 05</ng-container>
+            <ng-container *ngSwitchCase="2">STEP 02 OF 05</ng-container>
+            <ng-container *ngSwitchCase="3">STEP 03 OF 05</ng-container>
+            <ng-container *ngSwitchCase="4">STEP 04 OF 05</ng-container>
+            <ng-container *ngSwitchCase="5">STEP 05 OF 05</ng-container>
           </span>
-          <span class="step-pct">{{ currentStep * 25 }}% Complete</span>
-        </div>
+          <!-- Troque currentStep * 25 por: -->
+        <span class="step-pct">{{ (currentStep / totalSteps * 100) | number:'1.0-0' }}% Complete</span>
+       </div>
         <div class="step-bar">
-          <div class="step-progress" [style.width.%]="currentStep * 25"></div>
+          <div class="step-progress" [style.width.%]="currentStep / totalSteps * 100"></div>
         </div>
       </div>
 
@@ -187,40 +189,93 @@
         </div>
       </div>
 
-      <!-- STEP 4: Review -->
-      <div *ngIf="currentStep === 4" class="form-section">
-        <h2 class="form-title">Review & Confirm</h2>
-        <p class="form-subtitle">Please confirm your information before creating your account.</p>
+      <!-- STEP 4: Documentos -->
+    <div *ngIf="currentStep === 4" class="form-section">
+      <h2 class="form-title">Documents</h2>
+      <p class="form-subtitle">Upload clear photos of your documents for identity verification.</p>
 
-        <div class="review-block">
-          <div class="review-row"><span>Name</span><strong>{{ formCadastro.get('nomeCompleto')?.value }}</strong></div>
-          <div class="review-row"><span>CPF</span><strong>{{ formCadastro.get('cpf')?.value }}</strong></div>
-          <div class="review-row"><span>Email</span><strong>{{ formCadastro.get('email')?.value }}</strong></div>
-          <div class="review-row"><span>Phone</span><strong>{{ formCadastro.get('telefone')?.value }}</strong></div>
-          <div class="review-row"><span>City</span><strong>{{ formCadastro.get('cidade')?.value }}</strong></div>
-          <div class="review-row"><span>Street</span><strong>{{ formCadastro.get('rua')?.value }}, {{ formCadastro.get('numero')?.value }}</strong></div>
+      <div class="field-group full">
+        <label>RG FRONT</label>
+        <div class="upload-area" (click)="triggerUpload('rgFrente')" [class.uploaded]="arquivos.rgFrente">
+          <input type="file" #rgFrenteInput accept="image/*" style="display:none"
+                (change)="onFileSelect($event, 'rgFrente')" />
+          <span *ngIf="!arquivos.rgFrente">📄 Click to upload</span>
+          <span *ngIf="arquivos.rgFrente" class="file-name">✅ {{ arquivos.rgFrente.name }}</span>
         </div>
-
-        <label class="terms-check">
-          <input type="checkbox" [(ngModel)]="termosAceitos" />
-          I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-        </label>
-
-        <p *ngIf="mensagem" class="mensagem-erro">{{ mensagem }}</p>
       </div>
+
+      <div class="field-group full">
+        <label>RG BACK</label>
+        <div class="upload-area" (click)="triggerUpload('rgVerso')" [class.uploaded]="arquivos.rgVerso">
+          <input type="file" #rgVersoInput accept="image/*" style="display:none"
+                (change)="onFileSelect($event, 'rgVerso')" />
+          <span *ngIf="!arquivos.rgVerso">📄 Click to upload</span>
+          <span *ngIf="arquivos.rgVerso" class="file-name">✅ {{ arquivos.rgVerso.name }}</span>
+        </div>
+      </div>
+
+      <div class="field-group full">
+        <label>PROOF OF ADDRESS</label>
+        <div class="upload-area" (click)="triggerUpload('comprovante')" [class.uploaded]="arquivos.comprovante">
+          <input type="file" #comprovanteInput accept="image/*,application/pdf" style="display:none"
+                (change)="onFileSelect($event, 'comprovante')" />
+          <span *ngIf="!arquivos.comprovante">📄 Click to upload</span>
+          <span *ngIf="arquivos.comprovante" class="file-name">✅ {{ arquivos.comprovante.name }}</span>
+        </div>
+      </div>
+
+      <div class="field-group full">
+        <label>SELFIE</label>
+        <div class="upload-area" (click)="triggerUpload('selfie')" [class.uploaded]="arquivos.selfie">
+          <input type="file" #selfieInput accept="image/*" style="display:none"
+                (change)="onFileSelect($event, 'selfie')" />
+          <span *ngIf="!arquivos.selfie">🤳 Click to upload</span>
+          <span *ngIf="arquivos.selfie" class="file-name">✅ {{ arquivos.selfie.name }}</span>
+        </div>
+      </div>
+
+      <p class="error" *ngIf="erroDocumentos">All documents are required.</p>
+    </div>
+
+    <!-- STEP 5: Review -->
+    <div *ngIf="currentStep === 5" class="form-section">
+      <h2 class="form-title">Review & Confirm</h2>
+      <p class="form-subtitle">Please confirm your information before creating your account.</p>
+
+      <div class="review-block">
+        <div class="review-row"><span>Name</span><strong>{{ formCadastro.get('nomeCompleto')?.value }}</strong></div>
+        <div class="review-row"><span>CPF</span><strong>{{ formCadastro.get('cpf')?.value }}</strong></div>
+        <div class="review-row"><span>Email</span><strong>{{ formCadastro.get('email')?.value }}</strong></div>
+        <div class="review-row"><span>Phone</span><strong>{{ formCadastro.get('telefone')?.value }}</strong></div>
+        <div class="review-row"><span>City</span><strong>{{ formCadastro.get('cidade')?.value }}</strong></div>
+        <div class="review-row"><span>Street</span><strong>{{ formCadastro.get('rua')?.value }}, {{ formCadastro.get('numero')?.value }}</strong></div>
+        <div class="review-row">
+          <span>Documents</span>
+          <strong>{{ arquivos.rgFrente ? '✅' : '❌' }} RG &nbsp; {{ arquivos.selfie ? '✅' : '❌' }} Selfie &nbsp; {{ arquivos.comprovante ? '✅' : '❌' }} Comprovante</strong>
+        </div>
+      </div>
+
+      <label class="terms-check">
+        <input type="checkbox" [(ngModel)]="termosAceitos" />
+        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+      </label>
+
+      <p *ngIf="mensagem" class="mensagem-erro">{{ mensagem }}</p>
+    </div>
 
       <!-- Navigation buttons -->
-      <div class="form-actions">
-        <button class="btn-back" (click)="voltar()" *ngIf="currentStep > 1">Back</button>
-        <span *ngIf="currentStep === 1"></span>
+    <div class="form-actions">
+      <button class="btn-back" (click)="voltar()" *ngIf="currentStep > 1">Back</button>
+      <span *ngIf="currentStep === 1"></span>
 
-        <button class="btn-continue" (click)="avancar()" *ngIf="currentStep < 4">
-          CONTINUE →
-        </button>
-        <button class="btn-continue" (click)="enviar()" *ngIf="currentStep === 4" [disabled]="!termosAceitos">
-          CREATE ACCOUNT →
-        </button>
-      </div>
+      <button class="btn-continue" (click)="avancar()" *ngIf="currentStep < 5">
+        CONTINUE →
+      </button>
+
+      <button class="btn-continue" (click)="enviar()" *ngIf="currentStep === 5" [disabled]="!termosAceitos">
+        CREATE ACCOUNT →
+      </button>
+    </div>
 
       <!-- Trust badges -->
       <div class="trust-badges">

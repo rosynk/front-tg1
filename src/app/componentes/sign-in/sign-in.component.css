@@ -465,3 +465,19 @@
   .top-bar { padding: 14px 20px; }
   .field-row { flex-direction: column; }
 }
+.upload-area {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  background: #fafafa;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: #2563EB; background: #eff6ff; }
+  &.uploaded { border-color: #16a34a; background: #f0fdf4; }
+}
+
+.file-name { color: #16a34a; font-weight: 600; font-size: 0.82rem; }

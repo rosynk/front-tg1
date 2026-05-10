@@ -74,10 +74,18 @@ export class LoginComponent {
         this.processarSucessoLogin(res, '/dashboard');
       },
       error: (err) => {
-        console.error('❌ [Login] Falha na autenticação:', err);
-        this.mensagem = 'CPF ou Senha incorretos.';
+        const status = err.status;
+        const msg = err.error;
+
+        if (status === 403 && typeof msg === 'string' && msg.includes('análise')) {
+          this.mensagem = '⏳ Sua conta está em análise. Aguarde a aprovação do administrador.';
+        } else if (status === 403) {
+          this.mensagem = 'CPF ou senha incorretos.';
+        } else {
+          this.mensagem = 'Erro ao conectar com o servidor. Tente novamente.';
+        }
+
         this.loading = false;
-        alert('Dados inválidos. Verifique seu CPF e senha.');
       }
     });
   }

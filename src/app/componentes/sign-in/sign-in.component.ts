@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
   imports: [
-    CommonModule,       // ← já cobre tudo: *ngIf, *ngFor, ngSwitch, etc.
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     RouterModule
@@ -19,12 +19,34 @@ import { CommonModule, NgSwitch, NgSwitchCase } from '@angular/common';
 export class SignInComponent implements OnInit {
 
   currentStep = 1;
+  totalSteps = 5;
   showPassword = false;
   termosAceitos = false;
   mensagem = '';
+  erroDocumentos = false;
 
   formCadastro!: FormGroup;
 
+  // ── Arquivos de documento ──────────────────────────────────────────────────
+  arquivos: {
+    selfie: File | null;
+    rgFrente: File | null;
+    rgVerso: File | null;
+    comprovante: File | null;
+  } = {
+    selfie: null,
+    rgFrente: null,
+    rgVerso: null,
+    comprovante: null,
+  };
+
+  // ── Referências aos inputs de arquivo (usados pelo triggerUpload) ──────────
+  @ViewChild('selfieInput') selfieInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('rgFrenteInput') rgFrenteInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('rgVersoInput') rgVersoInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('comprovanteInput') comprovanteInput!: ElementRef<HTMLInputElement>;
+
+  // ── Getters de força de senha ──────────────────────────────────────────────
   get senhaForca(): number {
     const senha = this.formCadastro.get('senha')?.value || '';
     let score = 0;
@@ -71,15 +93,13 @@ export class SignInComponent implements OnInit {
       // Step 3 - Security
       senha: ['', Validators.required],
       confirmarSenha: [''],
-
-      
     });
   }
 
+  // ── Máscara CPF ────────────────────────────────────────────────────────────
   maskCpf(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '').slice(0, 11);
-    // Format as 000.000.000-00
     if (value.length > 9) {
       value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
     } else if (value.length > 6) {
@@ -88,10 +108,10 @@ export class SignInComponent implements OnInit {
       value = value.replace(/(\d{3})(\d+)/, '$1.$2');
     }
     input.value = value;
-    // Store only digits in the form
     this.formCadastro.get('cpf')?.setValue(value.replace(/\D/g, ''), { emitEvent: false });
   }
 
+  // ── Busca CEP via ViaCEP ───────────────────────────────────────────────────
   buscarCep() {
     const cep = this.formCadastro.get('cep')?.value?.replace(/\D/g, '');
     if (cep?.length === 8) {
@@ -100,7 +120,7 @@ export class SignInComponent implements OnInit {
           if (!data.erro) {
             this.formCadastro.patchValue({
               rua: data.logradouro,
-              bairro: data.bairro, 
+              bairro: data.bairro,
               cidade: data.localidade,
               estado: data.uf,
             });
@@ -111,35 +131,68 @@ export class SignInComponent implements OnInit {
     }
   }
 
+  // ── Upload de documentos ───────────────────────────────────────────────────
+  triggerUpload(campo: 'selfie' | 'rgFrente' | 'rgVerso' | 'comprovante') {
+    const map = {
+      selfie: this.selfieInput,
+      rgFrente: this.rgFrenteInput,
+      rgVerso: this.rgVersoInput,
+      comprovante: this.comprovanteInput,
+    };
+    map[campo]?.nativeElement.click();
+  }
+
+  onFileSelect(event: Event, campo: 'selfie' | 'rgFrente' | 'rgVerso' | 'comprovante') {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.arquivos[campo] = input.files[0];
+      this.erroDocumentos = false;
+    }
+  }
+
+  // ── Navegação entre steps ──────────────────────────────────────────────────
   avancar() {
-    // Validate per step before advancing
+    // Validação Step 1 — dados pessoais
     if (this.currentStep === 1) {
-      const fields = ['nomeCompleto', 'cpf', 'email'];
+      const fields = ['nomeCompleto', 'cpf', 'email', 'dataNascimento'];
       fields.forEach(f => this.formCadastro.get(f)?.markAsTouched());
       const step1Valid = fields.every(f => this.formCadastro.get(f)?.valid);
       if (!step1Valid) return;
     }
 
+    // Validação Step 3 — senha
     if (this.currentStep === 3) {
       this.formCadastro.get('senha')?.markAsTouched();
       if (this.formCadastro.get('senha')?.invalid) return;
       if (this.formCadastro.get('senha')?.value !== this.formCadastro.get('confirmarSenha')?.value) return;
     }
 
-    if (this.currentStep < 4) this.currentStep++;
+    // Validação Step 4 — documentos obrigatórios
+    if (this.currentStep === 4) {
+      const { selfie, rgFrente, rgVerso, comprovante } = this.arquivos;
+      if (!selfie || !rgFrente || !rgVerso || !comprovante) {
+        this.erroDocumentos = true;
+        return;
+      }
+      this.erroDocumentos = false;
+    }
+
+    if (this.currentStep < this.totalSteps) this.currentStep++;
   }
 
   voltar() {
     if (this.currentStep > 1) this.currentStep--;
   }
 
+  // ── Envio final como multipart/form-data ──────────────────────────────────
   enviar() {
     if (!this.termosAceitos) {
       this.mensagem = 'Você precisa aceitar os termos para continuar.';
       return;
     }
 
-    const payload = {
+    // Objeto JSON que vai como a part "dados"
+    const dados = {
       nomeCompleto: this.formCadastro.get('nomeCompleto')?.value,
       cpf: this.formCadastro.get('cpf')?.value,
       dataNascimento: this.formCadastro.get('dataNascimento')?.value,
@@ -147,9 +200,9 @@ export class SignInComponent implements OnInit {
       telefone: this.formCadastro.get('telefone')?.value,
       senha: this.formCadastro.get('senha')?.value,
       endereco: {
-        id: 0,  
+        id: 0,
         rua: this.formCadastro.get('rua')?.value,
-        numero: Number(this.formCadastro.get('numero')?.value), // ← cast para number
+        numero: Number(this.formCadastro.get('numero')?.value),
         complemento: this.formCadastro.get('complemento')?.value,
         bairro: this.formCadastro.get('bairro')?.value,
         cidade: this.formCadastro.get('cidade')?.value,
@@ -160,7 +213,20 @@ export class SignInComponent implements OnInit {
       role: 'ROLE_CLIENTE',
     };
 
-    this.http.post('/api/onboarding/proposta', payload).subscribe({
+    // Monta FormData espelhando exatamente os @RequestPart do PropostaController
+    const formData = new FormData();
+
+    // "dados" precisa ser um Blob com application/json para o Spring identificar a part corretamente
+    formData.append('dados', new Blob([JSON.stringify(dados)], { type: 'application/json' }));
+
+    // Arquivos físicos — os nomes das parts devem ser idênticos aos do @RequestPart no backend
+    formData.append('selfie', this.arquivos.selfie!);
+    formData.append('rgFrente', this.arquivos.rgFrente!);
+    formData.append('rgVerso', this.arquivos.rgVerso!);
+    formData.append('comprovante', this.arquivos.comprovante!);
+
+    // NÃO setar Content-Type manualmente — o HttpClient gera o boundary correto automaticamente
+    this.http.post('/api/onboarding/proposta', formData).subscribe({
       next: () => this.router.navigate(['/login']),
       error: (err) => {
         this.mensagem = err?.error?.message || 'Erro ao criar conta. Tente novamente.';

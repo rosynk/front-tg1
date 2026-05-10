@@ -39,16 +39,15 @@ export const routes: Routes = [
     component: ExtratoComponent,
     canActivate: [authGuard],
     title: 'Extrato - Bizi Bank',
-    data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] } // Adicionei as roles para manter o padrão
+    data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] }
   },
-
 
   {
     path: 'transferencia-pix',
-    component: TransferenciaPixComponent ,
+    component: TransferenciaPixComponent,
     canActivate: [authGuard],
-    title: 'Extrato - Bizi Bank',
-    data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] } // Adicionei as roles para manter o padrão
+    title: 'Pix - Bizi Bank', // ✅ Corrigido de "Extrato" para "Pix"
+    data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] }
   },
 
   // 4. Rota de Wildcard (DEVE SER SEMPRE A ÚLTIMA)

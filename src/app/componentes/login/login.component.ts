@@ -76,8 +76,12 @@ export class LoginComponent {
       error: (err) => {
         const status = err.status;
         const msg = err.error;
+        console.log('STATUS:', err.status);
+        console.log('ERROR COMPLETO:', err.error);
+        console.log('TIPO:', typeof err.error);
 
-        if (status === 403 && typeof msg === 'string' && msg.includes('análise')) {
+
+        if (status === 403 && typeof msg === 'string' && msg.includes('desabilitado')) {
           this.mensagem = '⏳ Sua conta está em análise. Aguarde a aprovação do administrador.';
         } else if (status === 403) {
           this.mensagem = 'CPF ou senha incorretos.';

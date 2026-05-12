@@ -9,13 +9,11 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = authService.getToken();
 
-  // 1. Logs de Auditoria de Saída
   console.log(`--- 🌐 [INSPEÇÃO HTTP] ---`);
   console.log(`📡 Requisição para: ${req.url}`);
 
   let authReq = req;
 
-  // 2. Validador de Token para rotas privadas
   if (token) {
     console.log('🎫 [Interceptor] Token encontrado. Carimbando Header Authorization...');
     authReq = req.clone({
@@ -25,18 +23,23 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     console.warn('🚨 [Interceptor] Tentativa de acesso à API privada sem Token!');
   }
 
-  // 3. Validador de Resposta (Ouvindo o Java)
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       console.error(`❌ [Interceptor] Erro de Rede/API (${error.status}):`, error.message);
 
-      // Se o Java rejeitar o token (401) ou a role (403)
-      if (error.status === 401 || error.status === 403) {
-        console.error('🚫 [Sessão Inválida] Limpando dados e expulsando para o Login.');
+      // Rotas públicas — deixa o erro passar para o component tratar e exibir mensagem
+      const isRotaPublica =
+        req.url.includes('/api/auth') ||
+        req.url.includes('/api/onboarding');
+
+      if ((error.status === 401 || error.status === 403) && !isRotaPublica) {
+        // Só faz logout em rotas privadas (token expirado, sem permissão, etc.)
+        console.error('🚫 [Sessão Inválida] Limpando dados e redirecionando para o Login.');
         authService.logout();
         router.navigate(['/login']);
       }
 
+      // Sempre repassa o erro — o component decide o que mostrar pro usuário
       return throwError(() => error);
     })
   );

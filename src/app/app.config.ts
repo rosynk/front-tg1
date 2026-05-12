@@ -19,12 +19,7 @@ export const appConfig: ApplicationConfig = {
 
     // 3. Configuração do Cliente HTTP (Ajustada)
     provideHttpClient(
-      // Mantemos apenas os interceptores funcionais por enquanto
       withInterceptors([jwtInterceptor])
-
-      // ⚠️ REMOVIDO: withFetch()
-      // Motivo: No Angular 18, o withFetch pode ignorar interceptores se não estiver
-      // configurado em conjunto com polyfills específicos ou se a versão do Node for antiga.
     )
   ]
 };

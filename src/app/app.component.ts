@@ -1,15 +1,20 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms'; // ✅ Importante
-import { CommonModule } from '@angular/common'; // ✅ Para pipes e diretivas comuns
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { SharedDataService } from './core/services/shared-data.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true, // Certifique-se de que está como standalone
-  imports: [RouterOutlet, FormsModule, CommonModule], // ✅ Adicione aqui
+  standalone: true,
+  imports: [RouterModule, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'banco-heppay';
+export class AppComponent implements OnInit {
+  constructor(public shared: SharedDataService) {}
+
+  ngOnInit() {
+    this.shared.carregarConta();
+  }
 }

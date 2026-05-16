@@ -1,0 +1,167 @@
+/* app.component.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Syne:wght@700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─ Grid principal ─ */
+.db-wrap {
+  font-family: 'DM Sans', sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 230px 1fr 300px;
+  grid-template-rows: 56px 1fr auto;
+  grid-template-areas:
+    "sidebar topbar right"
+    "sidebar main   right"
+    "footer  footer footer";
+}
+
+/* ─ Topbar ─ */
+.db-topbar {
+  grid-area: topbar;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+.db-topbar-nav { display: flex; gap: 28px; }
+.db-topbar-nav a { font-size: 13px; color: #374151; text-decoration: none; font-weight: 500; }
+.db-topbar-nav a:hover { color: #111; }
+.db-topbar-right { display: flex; align-items: center; gap: 12px; }
+.db-search {
+  display: flex; align-items: center; gap: 7px;
+  background: #f3f4f6; border-radius: 8px; padding: 7px 12px;
+}
+.db-search input {
+  border: none; background: transparent; font-size: 13px;
+  color: #374151; outline: none; width: 130px; font-family: 'DM Sans', sans-serif;
+}
+.db-search input::placeholder { color: #9ca3af; }
+.db-btn-login {
+  background: #1d4ed8; color: #fff; border: none; border-radius: 8px;
+  padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ─ Sidebar esquerda ─ */
+.db-sidebar {
+  grid-area: sidebar;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+.db-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 700; color: #111; padding: 0 4px;
+}
+.db-user {
+  display: flex; align-items: center; gap: 10px;
+  background: #eff6ff; border-radius: 12px; padding: 12px;
+}
+.db-avatar {
+  width: 34px; height: 34px; background: #2563eb; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 600; font-size: 13px; flex-shrink: 0;
+}
+.db-user-name { font-size: 12px; font-weight: 600; color: #111; }
+.db-user-tag  { font-size: 10px; color: #6b7280; margin-top: 1px; }
+
+.db-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.db-nav-section {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  color: #9ca3af; padding: 4px 12px; text-transform: uppercase;
+}
+.db-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; color: #4b5563;
+  cursor: pointer; text-decoration: none; transition: all .15s;
+}
+.db-nav-item:hover { background: #f3f4f6; color: #111; }
+.db-nav-item.active { background: #eff6ff; color: #1d4ed8; }
+
+.db-btn-quick {
+  background: #0f172a; color: #fff; border: none; border-radius: 10px;
+  padding: 13px; font-family: 'Syne', sans-serif; width: 100%;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; cursor: pointer;
+}
+.db-btn-quick:hover { background: #1e293b; }
+
+.db-sidebar-help {
+  display: flex; align-items: center; gap: 6px; margin-top: 8px;
+  font-size: 12px; color: #9ca3af; cursor: pointer; padding: 4px 12px;
+}
+.db-sidebar-help:hover { color: #6b7280; }
+
+/* ─ Main (router-outlet) ─ */
+.db-main {
+  grid-area: main;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  overflow-y: auto;
+}
+
+/* ─ Sidebar direita ─ */
+.db-right {
+  grid-area: right;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* ─ Investimentos ─ */
+.db-invest { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; }
+.db-invest-label { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+.db-invest-sub { font-size: 10px; letter-spacing: .1em; color: #9ca3af; font-weight: 600; margin-bottom: 6px; }
+.db-invest-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 14px; }
+.db-invest-bar-row { display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 7px; }
+.db-invest-pct { color: #16a34a; font-weight: 600; }
+.db-invest-track { height: 6px; background: #e5e7eb; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+.db-invest-fill { height: 100%; background: #2563eb; border-radius: 10px; width: 72%; }
+.db-btn-optimize {
+  width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 10px; font-size: 12px; font-weight: 600; color: #374151;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s;
+}
+.db-btn-optimize:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+
+/* ─ Vault ─ */
+.db-vault { background: #0f172a; border-radius: 16px; padding: 20px; color: #fff; }
+.db-vault-head {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 10px;
+}
+.db-vault-desc { font-size: 12px; color: #94a3b8; line-height: 1.6; margin-bottom: 16px; }
+.db-vault-status { display: flex; align-items: center; justify-content: space-between; }
+.db-status-lbl { font-size: 10px; letter-spacing: .1em; color: #475569; font-weight: 600; }
+.db-status-badge {
+  background: #10b981; color: #fff; font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; padding: 3px 10px; border-radius: 20px;
+}
+
+/* ─ Footer ─ */
+.db-footer {
+  grid-area: footer;
+  background: #fff; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 48px; align-items: flex-start; padding: 28px 32px;
+}
+.db-footer-brand { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.db-footer-brand strong { font-family: 'Syne', sans-serif; font-size: 14px; color: #0f172a; }
+.db-footer-brand small { font-size: 11px; color: #9ca3af; }
+.db-footer-col { display: flex; flex-direction: column; gap: 6px; }
+.db-footer-col span { font-size: 11px; font-weight: 700; letter-spacing: .07em; color: #0f172a; margin-bottom: 2px; }
+.db-footer-col a { font-size: 12px; color: #9ca3af; text-decoration: none; }
+.db-footer-col a:hover { color: #2563eb; }

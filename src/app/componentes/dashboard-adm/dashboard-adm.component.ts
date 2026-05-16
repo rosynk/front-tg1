@@ -123,12 +123,10 @@ export class DashboardAdmComponent implements OnInit {
   // Para dev local, o ideal é o backend expor os arquivos via endpoint /docs/{filename}.
   getDocUrl(caminho: string): string {
     if (!caminho) return '';
-    // Se já for uma URL completa, retorna direto
     if (caminho.startsWith('http')) return caminho;
-    // Extrai só o nome do arquivo do caminho absoluto do Windows/Linux
     const nomeArquivo = caminho.split(/[\\/]/).pop();
-    return `${this.DOCS_BASE}/api/documentos/${nomeArquivo}`;
-  }
+    return `${this.DOCS_BASE}/api/documentos/ver/${nomeArquivo}`;
+}
 
   // ── Abrir/fechar imagem ampliada ──────────────────────────────────────────
   abrirImagem(url: string) {

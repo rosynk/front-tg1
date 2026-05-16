@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
 
 // --- Interfaces ---
 interface Usuario {
@@ -63,7 +64,11 @@ export class DashboardComponent implements OnInit {
 
   private readonly API_BASE = 'http://localhost:8086/api';
 
-  constructor(private http: HttpClient, private router: Router) {}
+constructor(
+  private http: HttpClient,
+  private router: Router,
+  public visibilidadeValores: VisibilidadeValoresService
+) {}
 
   ngOnInit() {
     this.carregarDados();

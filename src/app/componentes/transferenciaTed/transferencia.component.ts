@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
+import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
 @Component({
   selector: 'app-transferencia',
   standalone: true,
@@ -34,9 +35,10 @@ export class TransferenciaComponent implements OnInit {
   private readonly API_BASE = 'http://localhost:8086/api';
 
   constructor(
-    private http: HttpClient,
-    public authService: AuthService // Injetando o serviço de autenticação
-  ) {}
+  private http: HttpClient,
+  public authService: AuthService,
+  public visibilidadeValores: VisibilidadeValoresService
+) {}
 
   ngOnInit() {
     // 1. Subscreve ao usuário logado para atualizar o "Cofre Premium"

@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { LoginService } from '../../core/services/login.service';
 import { ExtratoService, ExtratoResponse } from '../../core/services/extrato.service';
 import { AuthService } from '../../core/services/auth.service'; // Certifique-se de que o caminho está correto
+import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
 
 @Component({
   selector: 'app-extrato',
@@ -30,13 +31,13 @@ export class ExtratoComponent implements OnInit {
   saldoPeriodo: number = 0;
 
   usuarioNome: string = '';
-  usuarioLogado: any = null; // Variável para o objeto completo do Jose
-
+  usuarioLogado: any = null; 
   constructor(
-    private loginService: LoginService,
-    private extratoService: ExtratoService,
-    private authService: AuthService // Injeção do AuthService para o Jose aparecer
-  ) { }
+  private loginService: LoginService,
+  private extratoService: ExtratoService,
+  private authService: AuthService,
+  public visibilidadeValores: VisibilidadeValoresService
+) { }
 
   ngOnInit(): void {
     // MÉTODO INCLUÍDO: Sincronização em tempo real com o AuthService

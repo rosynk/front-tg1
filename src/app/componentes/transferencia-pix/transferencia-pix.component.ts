@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { PixService } from '../../core/services/pix.service';
 import { AuthService } from '../../core/services/auth.service'; // ✅ Sincronia com AuthService
+import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
 
 @Component({
   selector: 'app-transferencia-pix',
@@ -46,10 +47,11 @@ export class TransferenciaPixComponent implements OnInit {
   listaChaves: any[] = [];
 
   constructor(
-    private router: Router,
-    private pixService: PixService,
-    private authService: AuthService // ✅ Injetado para sincronizar o usuário
-  ) {}
+  private router: Router,
+  private pixService: PixService,
+  private authService: AuthService,
+  public visibilidadeValores: VisibilidadeValoresService
+) {}
 
  ngOnInit(): void {
   this.authService.currentUser$.subscribe(user => {

@@ -300,3 +300,22 @@
     font-size: 18px;
   }
 }
+.btn-eye {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e2e4e9;
+  border-radius: 50%;
+  background: #fff;
+  color: #8b93a5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-eye:hover {
+  color: #2563eb;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}

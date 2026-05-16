@@ -3,11 +3,34 @@
   <!-- Hero / Balance -->
   <div class="db-hero">
     <div>
-      <p class="db-balance-label">Saldo em conta</p>
+      <p class="db-balance-label">
+        Saldo em conta
+
+        <button
+          type="button"
+          class="btn-eye"
+          (click)="visibilidadeValores.alternar()"
+          [attr.aria-label]="visibilidadeValores.mostrarValores ? 'Ocultar valores' : 'Mostrar valores'">
+
+          <svg *ngIf="visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+
+          <svg *ngIf="!visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 11 8 11 8a21.96 21.96 0 0 1-3.17 4.13"/>
+            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
+            <path d="M1 1l22 22"/>
+          </svg>
+        </button>
+      </p>
 
       <h1 class="db-balance-val">
-        {{ conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ --,--' }}
-      </h1>
+      {{ visibilidadeValores.mostrarValores
+        ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
+        : 'R$ •••••' }}
+    </h1>
 
       <div class="db-acct-info" *ngIf="conta">
         <span>Ag. {{ conta.numeroAgencia }}</span>
@@ -68,20 +91,30 @@
 
     <div class="db-stat">
       <div class="db-stat-lbl">Total Entradas</div>
-      <div class="db-stat-val credit">{{ totalEntradas | currency:'BRL':'symbol':'1.2-2' }}</div>
+      <div class="db-stat-val credit">
+        {{ visibilidadeValores.mostrarValores
+          ? (totalEntradas | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
+      </div>
       <div class="db-stat-delta">↑ No período</div>
     </div>
 
     <div class="db-stat">
       <div class="db-stat-lbl">Total Saídas</div>
-      <div class="db-stat-val debit">{{ totalSaidas | currency:'BRL':'symbol':'1.2-2' }}</div>
+      <div class="db-stat-val debit">
+        {{ visibilidadeValores.mostrarValores
+          ? (totalSaidas | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
+      </div>
       <div class="db-stat-delta neg">↓ No período</div>
     </div>
 
     <div class="db-stat">
       <div class="db-stat-lbl">Saldo Período</div>
       <div class="db-stat-val" [class.credit]="saldoPeriodo >= 0" [class.debit]="saldoPeriodo < 0">
-        {{ saldoPeriodo | currency:'BRL':'symbol':'1.2-2' }}
+        {{ visibilidadeValores.mostrarValores
+          ? (saldoPeriodo | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
       </div>
       <div class="db-stat-delta">Operações: {{ extrato?.transacoes?.length || 0 }}</div>
     </div>
@@ -99,13 +132,11 @@
       </span>
     </div>
 
-    <!-- Loading -->
     <div *ngIf="loading" class="db-loading">
       <div class="db-spinner"></div>
       <p>Carregando lançamentos...</p>
     </div>
 
-    <!-- Transactions -->
     <div *ngIf="!loading && (extrato?.transacoes?.length || 0) > 0" class="db-tx-list">
 
       <div *ngFor="let transacao of extrato?.transacoes" class="db-tx">
@@ -136,7 +167,15 @@
             class="db-tx-val"
             [class.credit]="transacao.valor > 0"
             [class.debit]="transacao.valor < 0">
-            {{ transacao.valor > 0 ? '+' : '' }}{{ transacao.valor | currency:'BRL':'symbol':'1.2-2' }}
+
+            <ng-container *ngIf="visibilidadeValores.mostrarValores; else valorOculto">
+              {{ transacao.valor > 0 ? '+' : '' }}{{ transacao.valor | currency:'BRL':'symbol':'1.2-2' }}
+            </ng-container>
+
+            <ng-template #valorOculto>
+              R$ •••••
+            </ng-template>
+
           </span>
         </div>
 
@@ -144,7 +183,6 @@
 
     </div>
 
-    <!-- Empty -->
     <div *ngIf="!loading && (extrato?.transacoes?.length || 0) === 0" class="db-empty">
       Nenhum lançamento encontrado para este período.
     </div>

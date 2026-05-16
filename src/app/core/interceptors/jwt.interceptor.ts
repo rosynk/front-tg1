@@ -32,7 +32,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         req.url.includes('/api/auth') ||
         req.url.includes('/api/onboarding');
 
-      if ((error.status === 401 || error.status === 403) && !isRotaPublica) {
+      if (error.status === 401 && !isRotaPublica) {
         // Só faz logout em rotas privadas (token expirado, sem permissão, etc.)
         console.error('🚫 [Sessão Inválida] Limpando dados e redirecionando para o Login.');
         authService.logout();

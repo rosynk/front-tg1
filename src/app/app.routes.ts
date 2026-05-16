@@ -7,6 +7,7 @@ import { TransferenciaComponent } from './componentes/transferenciaTed/transfere
 import { ExtratoComponent } from './componentes/extrato/extrato.component'; // ✅ Importado corretamente
 import { authGuard } from './core/guards/auth.guard';
 import { TransferenciaPixComponent } from './componentes/transferencia-pix/transferencia-pix.component';
+import { DashboardAdmComponent } from './componentes/dashboard-adm/dashboard-adm.component';
 
 export const routes: Routes = [
   // 1. Redirecionamento Inicial
@@ -48,6 +49,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     title: 'Pix - Bizi Bank', // ✅ Corrigido de "Extrato" para "Pix"
     data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] }
+  },
+
+  {
+    path: 'dashboard-adm',
+    component: DashboardAdmComponent,
+    canActivate: [authGuard],
+    title: 'Painel ADM - Bizi Bank',
+    data: { roles: ['ROLE_ADMIN'] }
   },
 
   // 4. Rota de Wildcard (DEVE SER SEMPRE A ÚLTIMA)

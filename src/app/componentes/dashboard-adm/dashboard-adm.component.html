@@ -1,2 +1,244 @@
-<p>dashboard-adm works!</p>
-f
+<div class="db-wrap">
+
+  <!-- Sidebar -->
+  <aside class="db-sidebar">
+    <div class="db-brand">Bizi Bank <span class="db-brand-tag">ADM</span></div>
+
+    <div class="db-user">
+      <div class="db-avatar db-avatar--adm">A</div>
+      <div>
+        <div class="db-user-name">Administrador</div>
+        <div class="db-user-tag">Painel de Controle · Master</div>
+      </div>
+    </div>
+
+    <nav class="db-nav">
+      <span class="db-nav-section">Gestão</span>
+      <a class="db-nav-item" [class.active]="abaAtiva === 'propostas'" (click)="abaAtiva = 'propostas'">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Propostas
+        <span class="db-badge" *ngIf="totalPendentes > 0">{{ totalPendentes }}</span>
+      </a>
+      <a class="db-nav-item" [class.active]="abaAtiva === 'usuarios'" (click)="abaAtiva = 'usuarios'">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Usuários
+      </a>
+
+      <span class="db-nav-section" style="margin-top: 8px;">Sistema</span>
+      <a class="db-nav-item" routerLink="/login">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </a>
+    </nav>
+
+    <div class="db-sidebar-footer">
+      <div class="db-admin-info">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Acesso Privilegiado
+      </div>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="db-topbar">
+    <div class="db-topbar-title">
+      <h1>{{ abaAtiva === 'propostas' ? 'Análise de Propostas' : 'Gestão de Usuários' }}</h1>
+      <span class="db-topbar-sub">Painel Administrativo · Bizi Bank</span>
+    </div>
+    <div class="db-topbar-right">
+      <div class="db-filter-group">
+        <button class="db-filter-btn" [class.active]="filtroStatus === 'PENDENTE'" (click)="filtrarStatus('PENDENTE')">Pendentes</button>
+        <button class="db-filter-btn" [class.active]="filtroStatus === 'APROVADA'" (click)="filtrarStatus('APROVADA')">Aprovadas</button>
+        <button class="db-filter-btn" [class.active]="filtroStatus === 'NEGADA'" (click)="filtrarStatus('NEGADA')">Negadas</button>
+        <button class="db-filter-btn" [class.active]="filtroStatus === ''" (click)="filtrarStatus('')">Todas</button>
+      </div>
+      <button class="db-btn-refresh" (click)="carregarPropostas()" title="Atualizar">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="db-main">
+
+    <!-- Stats rápidos -->
+    <div class="db-stats">
+      <div class="db-stat db-stat--pending">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-lbl">Pendentes</div>
+          <div class="db-stat-val">{{ totalPendentes }}</div>
+        </div>
+      </div>
+      <div class="db-stat db-stat--approved">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-lbl">Aprovadas</div>
+          <div class="db-stat-val">{{ totalAprovadas }}</div>
+        </div>
+      </div>
+      <div class="db-stat db-stat--denied">
+        <div class="db-stat-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-lbl">Negadas</div>
+          <div class="db-stat-val">{{ totalNegadas }}</div>
+        </div>
+      </div>
+      <div class="db-stat">
+        <div class="db-stat-icon db-stat-icon--blue">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-lbl">Total</div>
+          <div class="db-stat-val">{{ propostas.length }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading / Erro -->
+    <div *ngIf="loading" class="db-loading">
+      <div class="db-spinner"></div>
+      <p>Carregando propostas...</p>
+    </div>
+    <div *ngIf="erro && !loading" class="db-error">{{ erro }}</div>
+
+    <!-- Lista de propostas -->
+    <div *ngIf="!loading && !erro" class="db-proposals">
+
+      <div *ngIf="propostasFiltradas.length === 0" class="db-empty">
+        Nenhuma proposta encontrada para o filtro selecionado.
+      </div>
+
+      <div *ngFor="let p of propostasFiltradas" class="db-proposal-card" [class.expanded]="propostaSelecionada?.id === p.id">
+
+        <!-- Cabeçalho do card -->
+        <div class="db-proposal-header" (click)="toggleProposta(p)">
+          <div class="db-proposal-info">
+            <div class="db-proposal-avatar">{{ p.nomeCompleto[0].toUpperCase() }}</div>
+            <div>
+              <div class="db-proposal-name">{{ p.nomeCompleto }}</div>
+              <div class="db-proposal-meta">CPF: {{ p.cpf }} · {{ p.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          </div>
+          <div class="db-proposal-right">
+            <span class="db-status-badge" [ngClass]="{
+              'db-status--pending': p.status === 'PENDENTE',
+              'db-status--approved': p.status === 'APROVADA',
+              'db-status--denied': p.status === 'NEGADA'
+            }">{{ p.status }}</span>
+            <svg class="db-chevron" [class.rotated]="propostaSelecionada?.id === p.id" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Detalhes expandidos -->
+        <div class="db-proposal-details" *ngIf="propostaSelecionada?.id === p.id">
+
+          <!-- Dados pessoais -->
+          <div class="db-detail-section">
+            <h3 class="db-detail-title">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Dados Pessoais
+            </h3>
+            <div class="db-detail-grid">
+              <div class="db-detail-item">
+                <span class="db-detail-lbl">Nome Completo</span>
+                <span class="db-detail-val">{{ p.nomeCompleto }}</span>
+              </div>
+              <div class="db-detail-item">
+                <span class="db-detail-lbl">CPF</span>
+                <span class="db-detail-val">{{ p.cpf }}</span>
+              </div>
+              <div class="db-detail-item">
+                <span class="db-detail-lbl">Score</span>
+                <span class="db-detail-val">{{ p.scoreNoMomento }}</span>
+              </div>
+              <div class="db-detail-item">
+                <span class="db-detail-lbl">Data de Submissão</span>
+                <span class="db-detail-val">{{ p.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="db-detail-item" *ngIf="p.observacao">
+                <span class="db-detail-lbl">Observação</span>
+                <span class="db-detail-val">{{ p.observacao }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documentos -->
+          <div class="db-detail-section">
+            <h3 class="db-detail-title">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Documentos Enviados
+            </h3>
+            <div class="db-docs-grid">
+              <div class="db-doc-card" *ngIf="p.urlSelfie">
+                <span class="db-doc-label">Selfie</span>
+                <img [src]="getDocUrl(p.urlSelfie)" alt="Selfie" class="db-doc-img" (click)="abrirImagem(getDocUrl(p.urlSelfie))" />
+              </div>
+              <div class="db-doc-card" *ngIf="p.urlRgFrente">
+                <span class="db-doc-label">RG Frente</span>
+                <img [src]="getDocUrl(p.urlRgFrente)" alt="RG Frente" class="db-doc-img" (click)="abrirImagem(getDocUrl(p.urlRgFrente))" />
+              </div>
+              <div class="db-doc-card" *ngIf="p.urlRgVerso">
+                <span class="db-doc-label">RG Verso</span>
+                <img [src]="getDocUrl(p.urlRgVerso)" alt="RG Verso" class="db-doc-img" (click)="abrirImagem(getDocUrl(p.urlRgVerso))" />
+              </div>
+              <div class="db-doc-card" *ngIf="p.urlComprovanteResidencia">
+                <span class="db-doc-label">Comprovante</span>
+                <img [src]="getDocUrl(p.urlComprovanteResidencia)" alt="Comprovante" class="db-doc-img" (click)="abrirImagem(getDocUrl(p.urlComprovanteResidencia))" />
+              </div>
+              <div *ngIf="!p.urlSelfie && !p.urlRgFrente && !p.urlRgVerso && !p.urlComprovanteResidencia" class="db-doc-empty">
+                Nenhum documento disponível
+              </div>
+            </div>
+          </div>
+
+          <!-- Ações (só para PENDENTE) -->
+          <div class="db-detail-actions" *ngIf="p.status === 'PENDENTE'">
+            <div class="db-obs-field">
+              <label>Observação (opcional)</label>
+              <input type="text" [(ngModel)]="observacaoMap[p.id]" placeholder="Ex: Documento ilegível, CPF inválido..." />
+            </div>
+            <div class="db-action-btns">
+              <button class="db-btn-approve" (click)="avaliarProposta(p.id, 'APROVADA')" [disabled]="loadingAcao === p.id">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                {{ loadingAcao === p.id ? 'Processando...' : 'Aprovar Conta' }}
+              </button>
+              <button class="db-btn-deny" (click)="avaliarProposta(p.id, 'NEGADA')" [disabled]="loadingAcao === p.id">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                {{ loadingAcao === p.id ? 'Processando...' : 'Negar Conta' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Mensagem de feedback -->
+          <div class="db-msg db-msg--success" *ngIf="msgSucessoMap[p.id]">✓ {{ msgSucessoMap[p.id] }}</div>
+          <div class="db-msg db-msg--error" *ngIf="msgErroMap[p.id]">✗ {{ msgErroMap[p.id] }}</div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de imagem ampliada -->
+  <div class="db-modal-overlay" *ngIf="imagemAmpliada" (click)="fecharImagem()">
+    <div class="db-modal-content" (click)="$event.stopPropagation()">
+      <button class="db-modal-close" (click)="fecharImagem()">✕</button>
+      <img [src]="imagemAmpliada" alt="Documento" />
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="db-footer">
+    <div class="db-footer-brand">
+      <strong>Bizi Bank · ADM</strong>
+      <small>© 2025 Bizi Bank. Uso restrito a administradores autorizados.</small>
+    </div>
+  </footer>
+
+</div>

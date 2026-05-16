@@ -2,12 +2,11 @@ import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { LoginService } from '../../core/services/login.service';
+import { AuthService } from '../../core/services/auth.service'; // ← import correto
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  // Adicionado FormsModule aqui para evitar erros de ngModel em componentes filhos ou modais
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -20,32 +19,31 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private loginService: LoginService,
+    private authService: AuthService,
     private router: Router
   ) {
-    // Form para Admin
     this.formAdm = this.fb.nonNullable.group({
       email: ['', [Validators.required, Validators.email]],
       senha: ['', [Validators.required]]
     });
 
-    // 🏦 FORM DO CLIENTE (Foco no CPF)
     this.formCliente = this.fb.nonNullable.group({
       cpf: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
       senha: ['', [Validators.required]]
     });
   }
 
-
-
   enviarAdm(): void {
     if (this.formAdm.invalid) return;
     this.loading = true;
+    const { email, senha } = this.formAdm.getRawValue();
 
-    this.loginService.login(this.formAdm.getRawValue()).subscribe({
-      next: (res: any) => {
-        // Redireciona Admin para o Welcome
-        this.processarSucessoLogin(res, '/welcome');
+    this.authService.login(email, senha).subscribe({
+      next: () => {
+        const user = this.authService.usuarioAtual;
+        const rota = user?.role === 'ROLE_ADMIN' ? '/dashboard-adm' : '/dashboard';
+        this.router.navigate([rota]);
+        this.loading = false;
       },
       error: () => {
         this.mensagem = 'Erro no login administrativo.';
@@ -54,33 +52,21 @@ export class LoginComponent {
     });
   }
 
-  // 🛡️ MÉTODO DO CLIENTE CORRIGIDO
   enviarCliente(): void {
-    if (this.formCliente.invalid) {
-      alert('Por favor, preencha o CPF e a senha corretamente.');
-      return;
-    }
-
+    if (this.formCliente.invalid) return;
     this.loading = true;
     const { cpf, senha } = this.formCliente.getRawValue();
 
-    console.log(`📡 [Bizi Bank] Iniciando autenticação para CPF: ${cpf}...`);
-
-    this.loginService.login({ cpf, senha }).subscribe({
-      next: (res: any) => {
-        console.log('✅ [Login] Credenciais aceitas pelo Java!');
-
-        // REDIRECIONAMENTO: Alterado de '/dashboard' para '/transferencia-pix'
-        this.processarSucessoLogin(res, '/dashboard');
+    this.authService.login(cpf, senha).subscribe({
+      next: () => {
+        const user = this.authService.usuarioAtual;
+        const rota = user?.role === 'ROLE_ADMIN' ? '/dashboard-adm' : '/dashboard';
+        this.router.navigate([rota]);
+        this.loading = false;
       },
       error: (err) => {
         const status = err.status;
         const msg = err.error;
-        console.log('STATUS:', err.status);
-        console.log('ERROR COMPLETO:', err.error);
-        console.log('TIPO:', typeof err.error);
-
-
         if (status === 403 && typeof msg === 'string' && msg.includes('desabilitado')) {
           this.mensagem = '⏳ Sua conta está em análise. Aguarde a aprovação do administrador.';
         } else if (status === 403) {
@@ -88,39 +74,9 @@ export class LoginComponent {
         } else {
           this.mensagem = 'Erro ao conectar com o servidor. Tente novamente.';
         }
-
         this.loading = false;
       }
     });
-  }
-
-  /**
-   * Método auxiliar para padronizar o salvamento de sessão
-   */
-  private processarSucessoLogin(res: any, rotaDestino: string): void {
-    // Limpa sessões anteriores por segurança (LGPD)
-    localStorage.clear();
-
-    // Salva o token JWT retornado pelo Spring Boot
-    if (res.token) {
-      localStorage.setItem('token', res.token);
-    }
-
-    // Armazena dados básicos do usuário
-    const usuarioLogado = {
-      id: res.cpf || res.sub,
-      nome: res.nome || 'Cliente Bizi',
-      role: res.role || 'ROLE_USER'
-    };
-
-    localStorage.setItem('user', JSON.stringify(usuarioLogado));
-
-    console.log(`🚀 Sessão preparada para ${usuarioLogado.nome}. Navegando para ${rotaDestino}...`);
-
-    // Pequeno timeout para garantir a escrita no LocalStorage
-    setTimeout(() => {
-      this.router.navigate([rotaDestino]);
-    }, 100);
   }
 
   navegarParaSignIn(): void {

@@ -210,7 +210,7 @@ export class SignInComponent implements OnInit {
         cep: this.formCadastro.get('cep')?.value,
       },
       tipoConta: this.formCadastro.get('tipoConta')?.value ?? 'CORRENTE',
-      role: 'ROLE_CLIENTE',
+      role: 'ROLE_ADMIN',
     };
 
     // Monta FormData espelhando exatamente os @RequestPart do PropostaController

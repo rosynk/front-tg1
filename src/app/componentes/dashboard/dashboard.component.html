@@ -1,130 +1,134 @@
-<div class="db-wrap">
+<div class="db-content">
 
-  <!-- Topbar -->
-  <header class="db-topbar">
-    <nav class="db-topbar-nav">
-      <a href="#">Produtos</a>
-      <a href="#">Segurança</a>
-      <a href="#">Suporte</a>
-    </nav>
-    <div class="db-topbar-right">
-      <div class="db-search">
-        <svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Buscar..." />
+  <!-- Hero / Balance -->
+  <div class="db-hero">
+    <div>
+      <p class="db-balance-label">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Saldo disponível
+      </p>
+
+      <h1 class="db-balance-val">
+        {{ conta?.saldo != null ? (conta!.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ --,--' }}
+      </h1>
+
+      <span class="db-balance-badge">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+        +2,4% este mês
+      </span>
+
+      <div class="db-acct-info" *ngIf="conta">
+        <span>Ag. {{ conta.numeroAgencia }}</span>
+        <span class="db-acct-sep">·</span>
+        <span>Cc. {{ conta.numeroConta }}</span>
+        <span class="db-acct-sep">·</span>
+        <span class="db-acct-tipo">{{ conta.tipoConta }}</span>
       </div>
-      <button class="db-btn-login" routerLink="/login">Entrar</button>
     </div>
-  </header>
+  </div>
 
-  <!-- Main -->
-  <main class="db-main">
+  <!-- Stats -->
+  <div class="db-stats">
 
-    <!-- Hero / Balance -->
-    <div class="db-hero">
-      <div>
-        <p class="db-balance-label">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Saldo disponível
-        </p>
-        <h1 class="db-balance-val">
-          {{ conta?.saldo != null ? (conta!.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ --,--' }}
-        </h1>
-        <span class="db-balance-badge">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-          +2,4% este mês
+    <div class="db-stat">
+      <div class="db-stat-lbl">Entradas (mês)</div>
+      <div class="db-stat-val">R$ 4.280</div>
+      <div class="db-stat-delta">↑ 8,2%</div>
+    </div>
+
+    <div class="db-stat">
+      <div class="db-stat-lbl">Saídas (mês)</div>
+      <div class="db-stat-val">R$ 1.940</div>
+      <div class="db-stat-delta neg">↓ 3,1%</div>
+    </div>
+
+    <div class="db-stat">
+      <div class="db-stat-lbl">Transações</div>
+      <div class="db-stat-val">
+        {{ extrato?.transacoes?.length ?? '—' }}
+      </div>
+      <div class="db-stat-delta">este mês</div>
+    </div>
+
+  </div>
+
+  <!-- Activity -->
+  <div class="db-activity">
+
+    <div class="db-activity-head">
+      <h2>Atividade Recente</h2>
+
+      <div class="db-activity-ctrl">
+        <span class="db-sort">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M3 6h18M7 12h10M11 18h2"/>
+          </svg>
+          Mais recentes
         </span>
-        <div class="db-acct-info" *ngIf="conta">
-          <span>Ag. {{ conta.numeroAgencia }}</span>
-          <span class="db-acct-sep">·</span>
-          <span>Cc. {{ conta.numeroConta }}</span>
-          <span class="db-acct-sep">·</span>
-          <span class="db-acct-tipo">{{ conta.tipoConta }}</span>
+
+        <a routerLink="/extrato" class="db-view-all">
+          Ver todas →
+        </a>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="db-loading">
+      <div class="db-spinner"></div>
+      <p>Carregando transações...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="erro && !loading" class="db-error">
+      {{ erro }}
+    </div>
+
+    <!-- Transactions -->
+    <div *ngIf="!loading && !erro" class="db-tx-list">
+
+      <div *ngFor="let tx of extrato?.transacoes" class="db-tx">
+
+        <div class="db-tx-icon">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
         </div>
-      </div>
-    </div>
 
-    <!-- Stats -->
-    <div class="db-stats">
-      <div class="db-stat">
-        <div class="db-stat-lbl">Entradas (mês)</div>
-        <div class="db-stat-val">R$ 4.280</div>
-        <div class="db-stat-delta">↑ 8,2%</div>
-      </div>
-      <div class="db-stat">
-        <div class="db-stat-lbl">Saídas (mês)</div>
-        <div class="db-stat-val">R$ 1.940</div>
-        <div class="db-stat-delta neg">↓ 3,1%</div>
-      </div>
-      <div class="db-stat">
-        <div class="db-stat-lbl">Transações</div>
-        <div class="db-stat-val">{{ extrato?.transacoes?.length ?? '—' }}</div>
-        <div class="db-stat-delta">este mês</div>
-      </div>
-    </div>
+        <div class="db-tx-info">
+          <p class="db-tx-title">
+            {{ tx.nomeContraparte || tx.cpfDestino || 'Destinatário' }}
+          </p>
 
-    <!-- Activity -->
-    <div class="db-activity">
-      <div class="db-activity-head">
-        <h2>Atividade Recente</h2>
-        <div class="db-activity-ctrl">
-          <span class="db-sort">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-            Mais recentes
-          </span>
-          <a routerLink="/extrato" class="db-view-all" style="cursor: pointer;">Ver todas →</a>
+          <p class="db-tx-sub">
+            {{ tx.tipoTransacao }} ·
+            {{ tx.dataHora | date:'dd/MM/yyyy, HH:mm' }}
+          </p>
         </div>
+
+        <span
+          class="db-tx-val"
+          [class.credit]="tx.valor > 0"
+          [class.debit]="tx.valor < 0">
+
+          {{ tx.valor > 0 ? '+' : '' }}
+          {{ tx.valor | currency:'BRL':'symbol':'1.2-2' }}
+
+        </span>
+
       </div>
 
-      <div *ngIf="loading" class="db-loading">
-        <div class="db-spinner"></div>
-        <p>Carregando transações...</p>
+      <!-- Empty -->
+      <div *ngIf="extrato?.transacoes?.length === 0" class="db-empty">
+        Nenhuma transação encontrada.
       </div>
-      <div *ngIf="erro && !loading" class="db-error">{{ erro }}</div>
 
-      <div *ngIf="!loading && !erro" class="db-tx-list">
-        <div *ngFor="let tx of extrato?.transacoes" class="db-tx">
-          <div class="db-tx-icon">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-          </div>
-          <div class="db-tx-info">
-               <p class="db-tx-title">Transferência para {{ tx.cpfDestino || 'Destinatário' }}</p>
-               <p class="db-tx-sub">{{ tx.tipoTransacao }} · {{ tx.dataHora | date:'dd/MM/yyyy, HH:mm' }}</p>
-           </div>
-          <span class="db-tx-val" [class.credit]="tx.valor > 0" [class.debit]="tx.valor < 0">
-            {{ tx.valor > 0 ? '+' : '' }}{{ tx.valor | currency:'BRL':'symbol':'1.2-2' }}
-          </span>
-        </div>
-        <div *ngIf="extrato?.transacoes?.length === 0" class="db-empty">
-          Nenhuma transação encontrada.
-        </div>
-      </div>
     </div>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="db-footer">
-    <div class="db-footer-brand">
-      <strong>Bizi Bank</strong>
-      <small>© 2025 Bizi Bank. Instituição financeira regulamentada pelo Banco Central do Brasil.</small>
-    </div>
-    <div class="db-footer-col">
-      <span>Plataforma</span>
-      <a href="#">Política de Privacidade</a>
-      <a href="#">Termos de Uso</a>
-      <a href="#">Acessibilidade</a>
-    </div>
-    <div class="db-footer-col">
-      <span>Recursos</span>
-      <a href="#">Cookies</a>
-      <a href="#">Mapa do Site</a>
-      <a href="#">Compliance</a>
-    </div>
-    <div class="db-footer-col">
-      <span>App Mobile</span>
-      <a href="#">App Store</a>
-      <a href="#">Google Play</a>
-    </div>
-  </footer>
+  </div>
 
 </div>

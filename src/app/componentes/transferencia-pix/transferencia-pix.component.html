@@ -1,131 +1,140 @@
-  <!-- Main Content -->
-  <main class="db-main">
+<!-- Main Content -->
+<main class="db-main">
 
-    <!-- Hero Balance -->
-    <div class="db-hero">
-      <div>
-        <p class="db-balance-label">Saldo disponível para Pix</p>
-        <h1 class="db-balance-val">
-          {{ conta?.saldo != null ? (conta!.saldo | currency:'BRL') : 'R$ --,--' }}
-        </h1>
-        <div class="db-acct-info" *ngIf="conta">
-          <span>Ag. {{ conta.numeroAgencia }}</span>
-          <span class="db-acct-sep">·</span>
-          <span>Cc. {{ conta.numeroConta }}</span>
-        </div>
+  <!-- Hero Balance -->
+  <div class="db-hero">
+    <div>
+      <p class="db-balance-label">Saldo disponível para Pix</p>
+      <h1 class="db-balance-val">
+        {{ conta?.saldo != null ? (conta!.saldo | currency:'BRL') : 'R$ --,--' }}
+      </h1>
+      <div class="db-acct-info" *ngIf="conta">
+        <span>Ag. {{ conta.numeroAgencia }}</span>
+        <span class="db-acct-sep">·</span>
+        <span>Cc. {{ conta.numeroConta }}</span>
       </div>
     </div>
+  </div>
 
-    <!-- ÁREA UNIFICADA PIX -->
-    <div class="pix-main-container">
+  <!-- ÁREA UNIFICADA PIX -->
+  <div class="pix-main-container">
 
-      <!-- 1. FORMULÁRIO DE ENVIO (Pix Transferir) -->
-      <section class="pix-card">
-        <div class="pix-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-          Enviar Novo Pix
+    <!-- 1. FORMULÁRIO DE ENVIO -->
+    <section class="pix-card">
+      <div class="pix-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+        Enviar Novo Pix
+      </div>
+
+      <div class="pix-form-row">
+        <div class="pix-input-group">
+          <label>Chave Pix do Destinatário</label>
+          <input type="text" [(ngModel)]="chavePix" placeholder="CPF, e-mail ou telefone">
         </div>
+
+        <div class="pix-input-group">
+          <label>Valor (R$)</label>
+          <input type="number" [(ngModel)]="valorPix" placeholder="0,00">
+        </div>
+      </div>
+
+      <button class="btn-bizi-primary" (click)="executarTransferencia()" [disabled]="loading">
+        {{ loading ? 'Processando...' : 'Confirmar envio' }}
+      </button>
+    </section>
+
+    <!-- 2. GERENCIAMENTO DE CHAVES -->
+    <section class="pix-card">
+      <div class="pix-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"></path>
+          <circle cx="7.5" cy="15.5" r="0.5" fill="currentColor"></circle>
+        </svg>
+        Minhas Chaves Pix
+      </div>
+
+      <!-- Cadastro Rápido de Chave -->
+      <div class="new-key-box">
+        <p class="new-key-box-title">Cadastrar Nova Chave</p>
+
         <div class="pix-form-row">
           <div class="pix-input-group">
-            <label>Chave Pix do Destinatário</label>
-            <input type="text" [(ngModel)]="chavePix" placeholder="CPF, e-mail ou telefone">
+            <label>Tipo</label>
+            <select [(ngModel)]="novaChave.tipo">
+              <option value="CPF">CPF</option>
+              <option value="EMAIL">E-mail</option>
+              <option value="TELEFONE">Telefone</option>
+              <option value="ALEATORIA">Chave Aleatória</option>
+            </select>
           </div>
+
           <div class="pix-input-group">
-            <label>Valor (R$)</label>
-            <input type="number" [(ngModel)]="valorPix" placeholder="0,00">
+            <label>Dados da Chave</label>
+            <input type="text" [(ngModel)]="novaChave.valor" placeholder="Insira o dado da chave">
           </div>
         </div>
-        <button class="btn-bizi-primary" (click)="executarTransferencia()" [disabled]="loading">
-          {{ loading ? 'Processando...' : 'Confirmar envio' }}
+
+        <button class="btn-bizi-slate-save" (click)="salvarNovaChave()">
+          Salvar Chave
         </button>
-      </section>
+      </div>
 
-      <!-- 2. GERENCIAMENTO DE CHAVES (Logo abaixo do envio) -->
-      <section class="pix-card">
-        <div class="pix-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"></path>
-               <circle cx="7.5" cy="15.5" r="0.5" fill="currentColor"></circle>
-           </svg>
-          Minhas Chaves Pix
-        </div>
-
-        <!-- Cadastro Rápido de Chave -->
-        <div style="background: #fafbfc; border: 1.5px dashed #dce4ec; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-          <p style="margin-top:0; font-weight: 700; color: #444; font-size: 0.9rem;">+ Cadastrar Nova Chave</p>
-          <div class="pix-form-row">
-            <div class="pix-input-group">
-              <label>Tipo</label>
-              <select [(ngModel)]="novaChave.tipo">
-                <option value="CPF">CPF</option>
-                <option value="EMAIL">E-mail</option>
-                <option value="TELEFONE">Telefone</option>
-                <option value="ALEATORIA">Chave Aleatória</option>
-              </select>
-            </div>
-            <div class="pix-input-group">
-              <label>Dados da Chave</label>
-              <input type="text" [(ngModel)]="novaChave.valor" placeholder="Insira o dado da chave">
-            </div>
+      <!-- Listagem de Chaves -->
+      <div class="key-list-container">
+        <div *ngFor="let item of listaChaves" class="key-item-row">
+          <div class="key-info">
+            <span class="key-badge">{{ formatarTipoChave(item.tipoChave) }}</span>
+            <p class="key-value">{{ item.chave }}</p>
           </div>
-          <button class="btn-bizi-slate-save" (click)="salvarNovaChave()">
-            Salvar Chave
+
+          <button class="btn-delete-action" (click)="removerChave(item.id)">
+            Excluir
           </button>
         </div>
 
-        <!-- Listagem de Chaves (Consultar e Deletar) -->
-        <div class="key-list-container">
-          <div *ngFor="let item of listaChaves" class="key-item-row">
-            <div>
-              <span class="key-badge">{{ formatarTipoChave(item.tipoChave) }}</span>
-              <p style="margin: 5px 0 0 0; font-weight: 600; color: #333; font-family: monospace;">{{ item.chave }}</p>
-            </div>
-            <button class="btn-delete-action" (click)="removerChave(item.id)">
-              Excluir
-            </button>
-          </div>
-
-          <div *ngIf="listaChaves.length === 0" style="text-align: center; color: #999; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-            Você ainda não possui chaves cadastradas.
-          </div>
+        <div *ngIf="listaChaves.length === 0" class="key-empty">
+          Você ainda não possui chaves cadastradas.
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- 3. HISTÓRICO RECENTE (Lançamentos Detalhados) -->
-      <section class="pix-card">
-          <div class="pix-title">Histórico Recente</div>
+    <!-- 3. HISTÓRICO RECENTE -->
+    <section class="pix-card">
+      <div class="pix-title">Histórico Recente</div>
 
-          <div *ngIf="loadingExtrato" style="text-align: center; padding: 20px;">
-               Carregando histórico...
-           </div>
+      <div *ngIf="loadingExtrato" class="history-loading">
+        Carregando histórico...
+      </div>
 
-  <div class="db-tx-list" *ngIf="!loadingExtrato">
-    <!-- Lista as últimas 3 ou 5 transações apenas -->
-    <div *ngFor="let tx of extrato?.transacoes | slice:0:5" class="key-item-row" style="background: white; border-bottom: 1px solid #f0f0f0; border-radius: 0;">
-      <!-- ... seu código de exibição da transação ... -->
-    </div>
+      <div class="db-tx-list" *ngIf="!loadingExtrato">
+        <div *ngFor="let tx of extrato?.transacoes | slice:0:5" class="history-item">
+          <!-- Seu código de exibição da transação aqui -->
+        </div>
 
-    <!-- BOTÃO VER MAIS -->
-    <div style="text-align: center; margin-top: 20px;">
-    <button class="btn-bizi-slate" routerLink="/extrato">
-        Ver Extrato Completo →
-      </button>
-    </div>
+        <div class="history-action">
+          <button class="btn-bizi-slate" routerLink="/extrato">
+            Ver Extrato Completo →
+          </button>
+        </div>
+      </div>
+    </section>
+
   </div>
-</section>
-    </div>
-  </main>
+</main>
 
-  <!-- Footer -->
-  <footer class="db-footer">
-    <div class="db-footer-brand">
-      <strong>Bizi Bank</strong>
-      <small>© 2026 Bizi Bank. Instituição Financeira Digital.</small>
-    </div>
-    <div class="db-footer-col">
-      <span>Conformidade</span>
-      <a href="#">Ética e Transparência</a>
-      <a href="#">Políticas de Privacidade</a>
-    </div>
-  </footer>
+<!-- Footer -->
+<footer class="db-footer">
+  <div class="db-footer-brand">
+    <strong>Bizi Bank</strong>
+    <small>© 2026 Bizi Bank. Instituição Financeira Digital.</small>
+  </div>
 
+  <div class="db-footer-col">
+    <span>Conformidade</span>
+    <a href="#">Ética e Transparência</a>
+    <a href="#">Políticas de Privacidade</a>
+  </div>
+</footer>

@@ -1,90 +1,88 @@
-<div class="db-wrap">
-  <header class="db-topbar">
-    <nav class="db-topbar-nav">
-      <a href="#">Produtos</a>
-      <a href="#">Segurança</a>
-      <a href="#">Suporte</a>
-    </nav>
-    <div class="db-topbar-right">
-      <div class="db-search">
-        <svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Buscar..." />
-      </div>
-      <!-- CORREÇÃO: Chamando o logout real ao sair -->
-      <button class="db-btn-login" (click)="authService.logout()" routerLink="/login">Sair</button>
-    </div>
-  </header>
+<div class="db-content">
 
-  <main class="db-main">
+  <!-- Hero / Balance -->
+  <div class="db-hero">
+    <div>
+      <p class="db-balance-label">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Saldo disponível para envio
+      </p>
 
-    <div class="db-hero">
-      <div>
-        <p class="db-balance-label">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Saldo disponível para envio
-        </p>
-        <!-- SEÇÃO CORRIGIDA: Validação de nulo para o pipe de Currency -->
-        <h1 class="db-balance-val">
-          {{ (extrato && extrato.saldoAtual != null) ? (extrato.saldoAtual | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00' }}
-        </h1>
-        <div class="db-acct-info" *ngIf="conta">
-          <span>Origem: Ag. {{ conta.numeroAgencia }}</span>
-          <span class="db-acct-sep">·</span>
-          <span>Cc. {{ conta.numeroConta }}</span>
-        </div>
+      <h1 class="db-balance-val">
+        {{ (extrato && extrato.saldoAtual != null) ? (extrato.saldoAtual | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00' }}
+      </h1>
+
+      <div class="db-acct-info" *ngIf="conta">
+        <span>Origem: Ag. {{ conta.numeroAgencia }}</span>
+        <span class="db-acct-sep">·</span>
+        <span>Cc. {{ conta.numeroConta }}</span>
       </div>
     </div>
+  </div>
 
-    <div class="db-activity">
-      <div class="db-activity-head">
-        <h2>Nova Transferência TED</h2>
-      </div>
+  <!-- Formulário TED -->
+  <section class="db-activity">
 
-      <div *ngIf="msgSucesso" class="alert-success" style="color: #10b981; margin-bottom: 15px; background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px;">{{ msgSucesso }}</div>
-      <div *ngIf="msgErro" class="alert-error" style="color: #ef4444; margin-bottom: 15px; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;">{{ msgErro }}</div>
+    <div class="db-activity-head">
+      <h2>Nova Transferência TED</h2>
+    </div>
 
-      <div class="transfer-container" style="display: flex; flex-direction: column; gap: 20px;">
+    <div *ngIf="msgSucesso" class="ted-alert ted-alert-success">
+      {{ msgSucesso }}
+    </div>
 
-        <div class="input-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
-          <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Agência</label>
-            <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
-               <input type="text" [(ngModel)]="transferenciaData.agenciaDestino" placeholder="0001" maxlength="4" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
-            </div>
-          </div>
+    <div *ngIf="msgErro" class="ted-alert ted-alert-error">
+      {{ msgErro }}
+    </div>
 
-          <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Conta de Destino</label>
-            <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
-                <input type="text" [(ngModel)]="transferenciaData.numeroContaDestino" placeholder="12345-6" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
-            </div>
-          </div>
+    <div class="ted-form">
+
+      <div class="ted-form-row">
+        <div class="ted-input-group ted-agency">
+          <label>Agência</label>
+          <input
+            type="text"
+            [(ngModel)]="transferenciaData.agenciaDestino"
+            placeholder="0001"
+            maxlength="4">
         </div>
 
-        <div class="input-block" style="display: flex; flex-direction: column; gap: 8px;">
-          <label style="font-size: 12px; color: #9ca3af; text-transform: uppercase;">Valor (R$)</label>
-          <div class="db-search-field" style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 12px;">
-            <input type="number" [(ngModel)]="transferenciaData.valor" placeholder="0,00" style="background: transparent; border: none; color: white; width: 100%; outline: none;" />
-          </div>
+        <div class="ted-input-group">
+          <label>Conta de Destino</label>
+          <input
+            type="text"
+            [(ngModel)]="transferenciaData.numeroContaDestino"
+            placeholder="12345-6">
         </div>
-
-        <button class="db-btn-send"
-                [disabled]="loadingTransfer"
-                (click)="enviarTransferencia()"
-                style="background: #10b981; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-          <span *ngIf="!loadingTransfer">Confirmar e Enviar TED</span>
-          <span *ngIf="loadingTransfer">Processando...</span>
-        </button>
       </div>
+
+      <div class="ted-input-group">
+        <label>Valor (R$)</label>
+        <input
+          type="number"
+          [(ngModel)]="transferenciaData.valor"
+          placeholder="0,00">
+      </div>
+
+      <button
+        class="ted-send-btn"
+        [disabled]="loadingTransfer"
+        (click)="enviarTransferencia()">
+        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar TED' }}
+      </button>
+
     </div>
 
-  </main>
-
-  <footer class="db-footer">
-    <div class="db-footer-brand">
-      <strong>Bizi Bank</strong>
-      <small>© 2026 Bizi Bank. Instituição financeira regulamentada.</small>
-    </div>
-  </footer>
+  </section>
 
 </div>
+
+<footer class="db-footer">
+  <div class="db-footer-brand">
+    <strong>Bizi Bank</strong>
+    <small>© 2026 Bizi Bank. Instituição financeira regulamentada.</small>
+  </div>
+</footer>

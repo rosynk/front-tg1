@@ -1,38 +1,34 @@
-<!-- Main Content -->
 <main class="db-main">
 
   <!-- Hero Balance -->
   <div class="db-hero">
     <div>
       <p class="db-balance-label">
-  Saldo disponível para Pix
+        Saldo disponível para Pix
+        <button type="button" class="btn-eye" (click)="visibilidadeValores.alternar()"
+          [attr.aria-label]="visibilidadeValores.mostrarValores ? 'Ocultar valores' : 'Mostrar valores'">
+          <svg *ngIf="visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg *ngIf="!visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 11 8 11 8a21.96 21.96 0 0 1-3.17 4.13"/>
+            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
+            <path d="M1 1l22 22"/>
+          </svg>
+        </button>
+      </p>
 
-  <button
-    type="button"
-    class="btn-eye"
-    (click)="visibilidadeValores.alternar()"
-    [attr.aria-label]="visibilidadeValores.mostrarValores ? 'Ocultar valores' : 'Mostrar valores'">
+      <h1 class="db-balance-val">
+        {{ visibilidadeValores.mostrarValores && conta?.saldo != null
+          ? (conta!.saldo | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
+      </h1>
 
-    <svg *ngIf="visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-
-    <svg *ngIf="!visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"/>
-      <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 11 8 11 8a21.96 21.96 0 0 1-3.17 4.13"/>
-      <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
-      <path d="M1 1l22 22"/>
-    </svg>
-  </button>
-</p>
-
-<h1 class="db-balance-val">
-  {{ visibilidadeValores.mostrarValores && conta?.saldo != null
-    ? (conta!.saldo | currency:'BRL':'symbol':'1.2-2')
-    : 'R$ •••••' }}
-</h1>
       <div class="db-acct-info" *ngIf="conta">
+        <span>{{ conta.usuario?.nomeCompleto }}</span>
+        <span class="db-acct-sep">·</span>
         <span>Ag. {{ conta.numeroAgencia }}</span>
         <span class="db-acct-sep">·</span>
         <span>Cc. {{ conta.numeroConta }}</span>
@@ -40,69 +36,63 @@
     </div>
   </div>
 
-  <!-- ÁREA UNIFICADA PIX -->
   <div class="pix-main-container">
 
     <!-- 1. FORMULÁRIO DE ENVIO -->
     <section class="pix-card">
       <div class="pix-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
         </svg>
         Enviar Novo Pix
       </div>
 
-      <div class="pix-form-row">
-        <div class="pix-input-group">
-          <label>Chave Pix do Destinatário</label>
-          <input type="text" [(ngModel)]="chavePix" placeholder="CPF, e-mail ou telefone">
-        </div>
-
-        <div class="pix-input-group">
-        <label>Valor (R$)</label>
-        <input
-          type="text"
-          inputmode="numeric"
-          [value]="valorFormatado"
-          (input)="onDigitarValor($event)"
-          (keydown)="onTeclaValor($event)"
-          placeholder="R$ 0,00">
-      </div>
+      <!-- Feedbacks -->
+      <div *ngIf="sucessoTransferencia" class="tf-alert tf-alert-success">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        {{ sucessoTransferencia }}
       </div>
 
-      <button class="btn-bizi-primary" (click)="executarTransferencia()" [disabled]="loading">
-        {{ loading ? 'Processando...' : 'Confirmar envio' }}
-      </button>
-
-      <p *ngIf="erroTransferencia" class="key-error">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <div *ngIf="erroTransferencia" class="tf-alert tf-alert-error">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+          <path d="M12 8v4M12 16h.01"/>
         </svg>
         {{ erroTransferencia }}
-      </p>
+      </div>
 
-      <p *ngIf="sucessoTransferencia" class="key-success">
-        ✓ {{ sucessoTransferencia }}
-      </p>
+      <div class="pix-form-row">
+        <div class="pix-input-group">
+          <label>Chave Pix do destinatário</label>
+          <input type="text" [(ngModel)]="chavePix" placeholder="CPF, e-mail ou telefone" />
+        </div>
+        <div class="pix-input-group">
+          <label>Valor</label>
+          <input type="text" inputmode="numeric" [value]="valorFormatado"
+            (input)="onDigitarValor($event)" (keydown)="onTeclaValor($event)"
+            placeholder="R$ 0,00" autocomplete="off" />
+        </div>
+      </div>
+
+      <button class="btn-bizi-primary" (click)="abrirConfirmacao()"
+        [disabled]="loading || buscandoDestinatario">
+        {{ buscandoDestinatario ? 'Verificando...' : 'Continuar' }}
+      </button>
     </section>
 
     <!-- 2. GERENCIAMENTO DE CHAVES -->
     <section class="pix-card">
       <div class="pix-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"></path>
-          <circle cx="7.5" cy="15.5" r="0.5" fill="currentColor"></circle>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/>
         </svg>
         Minhas Chaves Pix
       </div>
 
-      <!-- Cadastro Rápido de Chave -->
       <div class="new-key-box">
         <p class="new-key-box-title">Cadastrar Nova Chave</p>
-
         <div class="pix-input-group">
           <label>Tipo de Chave</label>
           <select [(ngModel)]="novaChave.tipo">
@@ -112,38 +102,22 @@
             <option value="ALEATORIA">Chave Aleatória</option>
           </select>
         </div>
-
-        <!-- Preview do valor que será cadastrado -->
         <p class="key-preview">
-          <span>Será cadastrado:  </span>
+          <span>Será cadastrado: </span>
           <strong>{{ previsualizarChave() }}</strong>
         </p>
-
-        <button class="btn-bizi-slate-save" (click)="salvarNovaChave()">
-          Salvar Chave
-        </button>
-
-        <p *ngIf="erroChave" class="key-error">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          {{ erroChave }}
-        </p>
+        <button class="btn-bizi-slate-save" (click)="salvarNovaChave()">Salvar Chave</button>
+        <p *ngIf="erroChave" class="key-error">{{ erroChave }}</p>
       </div>
 
-      <!-- Listagem de Chaves -->
       <div class="key-list-container">
         <div *ngFor="let item of listaChaves" class="key-item-row">
           <div class="key-info">
             <span class="key-badge">{{ formatarTipoChave(item.tipoChave) }}</span>
             <p class="key-value">{{ item.chave }}</p>
           </div>
-
-          <button class="btn-delete-action" (click)="removerChave(item.id)">
-            Excluir
-          </button>
+          <button class="btn-delete-action" (click)="removerChave(item.id)">Excluir</button>
         </div>
-
         <div *ngIf="listaChaves.length === 0" class="key-empty">
           Você ainda não possui chaves cadastradas.
         </div>
@@ -153,20 +127,11 @@
     <!-- 3. HISTÓRICO RECENTE -->
     <section class="pix-card">
       <div class="pix-title">Histórico Recente</div>
-
-      <div *ngIf="loadingExtrato" class="history-loading">
-        Carregando histórico...
-      </div>
-
+      <div *ngIf="loadingExtrato" class="history-loading">Carregando histórico...</div>
       <div class="db-tx-list" *ngIf="!loadingExtrato">
-        <div *ngFor="let tx of extrato | slice:0:5" class="history-item">
-          <!-- Seu código de exibição da transação aqui -->
-        </div>
-
+        <div *ngFor="let tx of extrato | slice:0:5" class="history-item"></div>
         <div class="history-action">
-          <button class="btn-bizi-slate" routerLink="/extrato">
-            Ver Extrato Completo →
-          </button>
+          <button class="btn-bizi-slate" routerLink="/extrato">Ver Extrato Completo →</button>
         </div>
       </div>
     </section>
@@ -174,16 +139,109 @@
   </div>
 </main>
 
-<!-- Footer -->
 <footer class="db-footer">
   <div class="db-footer-brand">
     <strong>Bizi Bank</strong>
     <small>© 2026 Bizi Bank. Instituição Financeira Digital.</small>
   </div>
-
   <div class="db-footer-col">
     <span>Conformidade</span>
     <a href="#">Ética e Transparência</a>
     <a href="#">Políticas de Privacidade</a>
   </div>
 </footer>
+
+
+<!-- ===================== MODAL DE CONFIRMAÇÃO PIX ===================== -->
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-icon-wrap pix-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="modal-title">Confirmar Pix</h3>
+        <p class="modal-subtitle">Revise os dados antes de confirmar</p>
+      </div>
+      <button type="button" class="modal-close-btn" (click)="fecharModal()" aria-label="Fechar">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Valor em destaque -->
+    <div class="modal-valor-destaque">
+      <span class="modal-valor-label">Valor a enviar</span>
+      <span class="modal-valor-num">
+        {{ valorNumerico | currency:'BRL':'symbol':'1.2-2' }}
+      </span>
+      <span class="modal-tipo-badge pix-badge">PIX</span>
+    </div>
+
+    <!-- De -->
+    <div class="modal-section">
+      <p class="modal-section-label">De</p>
+      <div class="modal-info-card">
+        <div class="modal-avatar">
+          {{ conta?.usuario?.nomeCompleto?.charAt(0) || 'U' }}
+        </div>
+        <div class="modal-info-body">
+          <p class="modal-info-name">{{ conta?.usuario?.nomeCompleto || 'Você' }}</p>
+          <p class="modal-info-sub">Ag. {{ conta?.numeroAgencia }} · Cc. {{ conta?.numeroConta }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seta -->
+    <div class="modal-arrow-sep">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+
+    <!-- Para -->
+    <div class="modal-section">
+      <p class="modal-section-label">Para</p>
+      <div class="modal-info-card">
+        <div class="modal-avatar dest">
+          {{ destinatarioNome?.charAt(0) || 'D' }}
+        </div>
+        <div class="modal-info-body">
+          <p class="modal-info-name">{{ destinatarioNome }}</p>
+          <p class="modal-info-sub">{{ destinatarioChave }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="modal-resumo">
+      <div class="modal-resumo-row">
+        <span class="modal-resumo-key">Tipo</span>
+        <span class="modal-resumo-val">Pix</span>
+      </div>
+      <div class="modal-resumo-row">
+        <span class="modal-resumo-key">Saldo após</span>
+        <span class="modal-resumo-val">
+          {{ (conta?.saldo - valorNumerico) | currency:'BRL':'symbol':'1.2-2' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" (click)="fecharModal()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="button" class="btn-modal-confirm" (click)="confirmarPix()" [disabled]="loading">
+        <span *ngIf="!loading">Confirmar Pix</span>
+        <span *ngIf="loading">Processando...</span>
+      </button>
+    </div>
+
+  </div>
+</div>

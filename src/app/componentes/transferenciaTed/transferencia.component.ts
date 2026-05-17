@@ -15,7 +15,6 @@ import { VisibilidadeValoresService } from '../../core/services/visibilidade-val
 })
 export class TransferenciaComponent implements OnInit {
   usuarioLogado: User | null = null;
-  extrato: any = null;
   conta: any = null;
 
   loading = false;
@@ -23,13 +22,20 @@ export class TransferenciaComponent implements OnInit {
   msgSucesso = '';
   msgErro = '';
 
+  // --- Controle do modal ---
+  modalAberto = false;
+  destinatarioNome = '';
+  destinatarioAgencia = '';
+  buscandoDestinatario = false;
+  erroDestinatario = '';
+
   transferenciaData = {
-  contaOrigem: 0,
-  agenciaDestino: '',
-  numeroContaDestino: '',
-  valor: null as number | null,
-  tipoTransferencia: 'TED'  
-};
+    contaOrigem: 0,
+    agenciaDestino: '',
+    numeroContaDestino: '',
+    valor: null as number | null,
+    tipoTransferencia: 'TED'
+  };
 
   valorDigitado: string = '';
 
@@ -45,75 +51,101 @@ export class TransferenciaComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.usuarioLogado = user;
     });
-
-    this.carregarDadosIniciais();
+    this.carregarConta();
   }
 
-  carregarDadosIniciais() {
+  carregarConta() {
     this.loading = true;
-
-    this.http.get<any>(`${this.API_BASE}/transacoes/extrato`).subscribe({
-      next: (data) => {
-        this.extrato = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar extrato', err);
-        this.loading = false;
-      }
-    });
-
     this.http.get<any[]>(`${this.API_BASE}/contas`).subscribe({
       next: (contas) => {
         if (contas && contas.length > 0) {
           this.conta = contas[0];
           this.transferenciaData.contaOrigem = this.conta.id;
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Erro ao carregar conta', err)
+      error: (err) => {
+        console.error('Erro ao carregar conta', err);
+        this.loading = false;
+      }
     });
   }
 
-  enviarTransferencia() {
-    this.transferenciaData.valor = this.valorNumerico;
+  // --- Abre o modal de confirmação ---
+  abrirConfirmacao() {
+    this.msgErro = '';
+    this.erroDestinatario = '';
 
     if (!this.transferenciaData.agenciaDestino || !this.transferenciaData.numeroContaDestino) {
-      this.msgErro = 'Preencha os dados de destino.';
+      this.msgErro = 'Preencha a agência e o número da conta de destino.';
       return;
     }
 
-    if (!this.transferenciaData.valor || this.transferenciaData.valor <= 0) {
+    if (!this.valorNumerico || this.valorNumerico <= 0) {
       this.msgErro = 'Informe um valor válido.';
       return;
     }
 
+    if (this.conta && this.valorNumerico > this.conta.saldo) {
+      this.msgErro = 'Saldo insuficiente para esta transferência.';
+      return;
+    }
+
+    this.transferenciaData.valor = this.valorNumerico;
+
+    // Busca o nome do destinatário pela conta de destino
+    this.buscandoDestinatario = true;
+
+    this.http.get<any>(`${this.API_BASE}/contas/buscar`, {
+      params: {
+        agencia: this.transferenciaData.agenciaDestino,
+        numeroConta: this.transferenciaData.numeroContaDestino
+      }
+    }).subscribe({
+      next: (destino) => {
+        this.destinatarioNome = destino.nomeCompleto || 'Destinatário';
+        this.destinatarioAgencia = destino.numeroAgencia;
+        this.buscandoDestinatario = false;
+        this.modalAberto = true;
+      },
+      error: () => {
+        this.msgErro = 'Conta de destino não encontrada. Verifique a agência e o número.';
+        this.buscandoDestinatario = false;
+      }
+    });
+  }
+
+  fecharModal() {
+    this.modalAberto = false;
+  }
+
+  // --- Confirma e envia após o modal ---
+  confirmarTransferencia() {
     this.loadingTransfer = true;
     this.msgSucesso = '';
     this.msgErro = '';
 
     this.http.post(`${this.API_BASE}/transferencias`, this.transferenciaData).subscribe({
       next: () => {
+        this.modalAberto = false;
         this.msgSucesso = 'Transferência realizada com sucesso!';
         this.loadingTransfer = false;
         this.limparFormulario();
-        this.carregarDadosIniciais();
+        this.carregarConta();
       },
       error: (err) => {
+        this.modalAberto = false;
         this.msgErro = err.error?.mensagem || 'Erro ao realizar transferência.';
         this.loadingTransfer = false;
       }
     });
   }
 
+  // --- Getters de valor formatado ---
   get valorFormatado(): string {
     if (!this.valorDigitado) return '';
-
     const numero = parseInt(this.valorDigitado, 10) / 100;
-
-    return numero.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
+    return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
   get valorNumerico(): number {
@@ -122,39 +154,27 @@ export class TransferenciaComponent implements OnInit {
 
   onDigitarValor(event: Event) {
     const input = event.target as HTMLInputElement;
-
     const apenasDigitos = input.value.replace(/\D/g, '');
     this.valorDigitado = apenasDigitos;
-
     input.value = this.valorFormatado;
     this.transferenciaData.valor = this.valorNumerico;
   }
 
   onTeclaValor(event: KeyboardEvent) {
     const permitidas = ['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight'];
-
     if (permitidas.includes(event.key)) {
       if (event.key === 'Backspace') {
         this.valorDigitado = this.valorDigitado.slice(0, -1);
-
         const input = event.target as HTMLInputElement;
         input.value = this.valorFormatado;
-
         this.transferenciaData.valor = this.valorNumerico;
         event.preventDefault();
       }
-
       return;
     }
-
     if (!/^\d$/.test(event.key)) {
       event.preventDefault();
     }
-  }
-
-  testeNavegacao() {
-    console.log('Navegação funcionando corretamente!');
-    alert('Sistema de navegação Bizi Bank ativo.');
   }
 
   private limparFormulario() {

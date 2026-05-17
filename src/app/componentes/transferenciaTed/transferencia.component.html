@@ -1,6 +1,6 @@
-<div class="db-content">
+<div class="tf-main">
 
-  <!-- Hero / Balance -->
+  <!-- Hero / Saldo -->
   <div class="db-hero">
     <div>
       <p class="db-balance-label">
@@ -8,92 +8,193 @@
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
-
-        Saldo disponível para envio
-
+        Saldo disponível
         <button type="button" class="btn-eye" (click)="visibilidadeValores.alternar()"
           [attr.aria-label]="visibilidadeValores.mostrarValores ? 'Ocultar valores' : 'Mostrar valores'">
           <svg *ngIf="visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
           </svg>
           <svg *ngIf="!visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"/>
             <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 11 8 11 8a21.96 21.96 0 0 1-3.17 4.13"/>
-            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/>
+            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
+            <path d="M1 1l22 22"/>
           </svg>
         </button>
       </p>
 
       <h1 class="db-balance-val">
-        {{ visibilidadeValores.mostrarValores
-          ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
+        {{ visibilidadeValores.mostrarValores && conta?.saldo != null
+          ? (conta!.saldo | currency:'BRL':'symbol':'1.2-2')
           : 'R$ •••••' }}
       </h1>
 
       <div class="db-acct-info" *ngIf="conta">
-        <span>Origem: Ag. {{ conta.numeroAgencia }}</span>
+        <span>{{ conta.usuario?.nomeCompleto }}</span>
+        <span class="db-acct-sep">·</span>
+        <span>Ag. {{ conta.numeroAgencia }}</span>
         <span class="db-acct-sep">·</span>
         <span>Cc. {{ conta.numeroConta }}</span>
+        <span class="db-acct-sep">·</span>
+        <span class="db-acct-tipo">{{ conta.tipoConta }}</span>
       </div>
     </div>
   </div>
 
   <!-- Formulário -->
-  <section class="db-activity">
+  <div class="pix-card">
+    <h2 class="pix-title">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+      Nova transferência
+    </h2>
 
-    <div class="db-activity-head">
-      <h2>Nova Transferência</h2>
+    <!-- Feedback -->
+    <div *ngIf="msgSucesso" class="tf-alert tf-alert-success">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+      {{ msgSucesso }}
     </div>
 
-    <!-- Seletor DOC / TED -->
-    <div class="ted-type-selector">
-      <label class="ted-type-option" [class.active]="transferenciaData.tipoTransferencia === 'TED'">
-        <input type="radio" name="tipoTransferencia" value="TED"
-              [(ngModel)]="transferenciaData.tipoTransferencia">
-        TED
-      </label>
-
-      <label class="ted-type-option" [class.active]="transferenciaData.tipoTransferencia === 'DOC'">
-        <input type="radio" name="tipoTransferencia" value="DOC"
-              [(ngModel)]="transferenciaData.tipoTransferencia">
-        DOC
-      </label>
+    <div *ngIf="msgErro" class="tf-alert tf-alert-error">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      {{ msgErro }}
     </div>
 
-    <div *ngIf="msgSucesso" class="ted-alert ted-alert-success">{{ msgSucesso }}</div>
-    <div *ngIf="msgErro" class="ted-alert ted-alert-error">{{ msgErro }}</div>
+    <!-- Tipo de transferência -->
+    <div class="tf-tipo-row">
+      <button type="button" class="tf-tipo-btn" [class.active]="transferenciaData.tipoTransferencia === 'TED'"
+        (click)="transferenciaData.tipoTransferencia = 'TED'">TED</button>
+      <button type="button" class="tf-tipo-btn" [class.active]="transferenciaData.tipoTransferencia === 'DOC'"
+        (click)="transferenciaData.tipoTransferencia = 'DOC'">DOC</button>
+    </div>
 
-    <div class="ted-form">
-
-      <div class="ted-form-row">
-        <div class="ted-input-group">
-          <label>Agência</label>
-          <input type="text" [(ngModel)]="transferenciaData.agenciaDestino" placeholder="0001" maxlength="4">
-        </div>
-        <div class="ted-input-group">
-          <label>Conta de Destino</label>
-          <input type="text" [(ngModel)]="transferenciaData.numeroContaDestino" placeholder="12345-6">
-        </div>
+    <!-- Dados de destino -->
+    <div class="pix-form-row">
+      <div class="pix-input-group">
+        <label>Agência destino</label>
+        <input type="text" placeholder="0001" [(ngModel)]="transferenciaData.agenciaDestino" maxlength="10" />
       </div>
-
-      <div class="ted-input-group">
-        <label>Valor (R$)</label>
-        <input type="text" [value]="valorFormatado" (input)="onDigitarValor($event)" (keydown)="onTeclaValor($event)" placeholder="R$ 0,00">
+      <div class="pix-input-group">
+        <label>Conta destino</label>
+        <input type="text" placeholder="000000" [(ngModel)]="transferenciaData.numeroContaDestino" maxlength="20" />
       </div>
-
-      <button class="ted-send-btn" [disabled]="loadingTransfer" (click)="enviarTransferencia()">
-        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar ' + transferenciaData.tipoTransferencia }}
-      </button>
-
     </div>
 
-  </section>
+    <!-- Valor -->
+    <div class="pix-input-group" style="margin-bottom: 24px;">
+      <label>Valor</label>
+      <input type="text" placeholder="R$ 0,00" [value]="valorFormatado"
+        (input)="onDigitarValor($event)" (keydown)="onTeclaValor($event)"
+        inputmode="numeric" autocomplete="off" />
+    </div>
+
+    <button type="button" class="btn-bizi-primary" (click)="abrirConfirmacao()"
+      [disabled]="loadingTransfer || buscandoDestinatario">
+      <span *ngIf="!buscandoDestinatario">Continuar</span>
+      <span *ngIf="buscandoDestinatario">Verificando dados...</span>
+    </button>
+  </div>
 
 </div>
 
-<footer class="db-footer">
-  <div class="db-footer-brand">
-    <strong>Bizi Bank</strong>
-    <small>© 2026 Bizi Bank. Instituição financeira regulamentada.</small>
+
+<!-- ===================== MODAL DE CONFIRMAÇÃO ===================== -->
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <!-- Header do modal -->
+    <div class="modal-header">
+      <div class="modal-icon-wrap">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="modal-title">Confirmar transferência</h3>
+        <p class="modal-subtitle">Revise os dados antes de confirmar</p>
+      </div>
+      <button type="button" class="modal-close-btn" (click)="fecharModal()" aria-label="Fechar">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Valor em destaque -->
+    <div class="modal-valor-destaque">
+      <span class="modal-valor-label">Valor a transferir</span>
+      <span class="modal-valor-num">
+        {{ transferenciaData.valor | currency:'BRL':'symbol':'1.2-2' }}
+      </span>
+      <span class="modal-tipo-badge">{{ transferenciaData.tipoTransferencia }}</span>
+    </div>
+
+    <!-- Seção: De -->
+    <div class="modal-section">
+      <p class="modal-section-label">De</p>
+      <div class="modal-info-card">
+        <div class="modal-avatar">
+          {{ conta?.usuario?.nomeCompleto?.charAt(0) || 'U' }}
+        </div>
+        <div class="modal-info-body">
+          <p class="modal-info-name">{{ conta?.usuario?.nomeCompleto || 'Você' }}</p>
+          <p class="modal-info-sub">Ag. {{ conta?.numeroAgencia }} · Cc. {{ conta?.numeroConta }} · {{ conta?.tipoConta }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seta de separação -->
+    <div class="modal-arrow-sep">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+
+    <!-- Seção: Para -->
+    <div class="modal-section">
+      <p class="modal-section-label">Para</p>
+      <div class="modal-info-card">
+        <div class="modal-avatar dest">
+          {{ destinatarioNome?.charAt(0) || 'D' }}
+        </div>
+        <div class="modal-info-body">
+          <p class="modal-info-name">{{ destinatarioNome }}</p>
+          <p class="modal-info-sub">Ag. {{ transferenciaData.agenciaDestino }} · Cc. {{ transferenciaData.numeroContaDestino }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="modal-resumo">
+      <div class="modal-resumo-row">
+        <span class="modal-resumo-key">Tipo</span>
+        <span class="modal-resumo-val">{{ transferenciaData.tipoTransferencia }}</span>
+      </div>
+      <div class="modal-resumo-row">
+        <span class="modal-resumo-key">Saldo após</span>
+        <span class="modal-resumo-val">
+          {{ (conta?.saldo - (transferenciaData.valor || 0)) | currency:'BRL':'symbol':'1.2-2' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" (click)="fecharModal()" [disabled]="loadingTransfer">
+        Cancelar
+      </button>
+      <button type="button" class="btn-modal-confirm" (click)="confirmarTransferencia()" [disabled]="loadingTransfer">
+        <span *ngIf="!loadingTransfer">Confirmar pagamento</span>
+        <span *ngIf="loadingTransfer">Processando...</span>
+      </button>
+    </div>
+
   </div>
-</footer>
+</div>

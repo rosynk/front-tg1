@@ -47,20 +47,16 @@
 
     <!-- Seletor DOC / TED -->
     <div class="ted-type-selector">
-      <label class="ted-type-option" [class.active]="transferenciaData.tipo === 'TED'">
-        <input type="radio" name="tipoTransferencia" value="TED" [(ngModel)]="transferenciaData.tipo">
-        <div class="ted-type-content">
-          <span class="ted-type-title">TED</span>
-          <span class="ted-type-desc">Disponível em minutos</span>
-        </div>
+      <label class="ted-type-option" [class.active]="transferenciaData.tipoTransferencia === 'TED'">
+        <input type="radio" name="tipoTransferencia" value="TED"
+              [(ngModel)]="transferenciaData.tipoTransferencia">
+        TED
       </label>
 
-      <label class="ted-type-option" [class.active]="transferenciaData.tipo === 'DOC'">
-        <input type="radio" name="tipoTransferencia" value="DOC" [(ngModel)]="transferenciaData.tipo">
-        <div class="ted-type-content">
-          <span class="ted-type-title">DOC</span>
-          <span class="ted-type-desc">Disponível no próximo dia útil</span>
-        </div>
+      <label class="ted-type-option" [class.active]="transferenciaData.tipoTransferencia === 'DOC'">
+        <input type="radio" name="tipoTransferencia" value="DOC"
+              [(ngModel)]="transferenciaData.tipoTransferencia">
+        DOC
       </label>
     </div>
 
@@ -86,7 +82,7 @@
       </div>
 
       <button class="ted-send-btn" [disabled]="loadingTransfer" (click)="enviarTransferencia()">
-        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar ' + transferenciaData.tipo }}
+        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar ' + transferenciaData.tipoTransferencia }}
       </button>
 
     </div>

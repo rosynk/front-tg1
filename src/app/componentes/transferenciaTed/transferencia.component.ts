@@ -24,12 +24,12 @@ export class TransferenciaComponent implements OnInit {
   msgErro = '';
 
   transferenciaData = {
-    contaOrigem: 0,
-    agenciaDestino: '',
-    numeroContaDestino: '',
-    valor: null as number | null,
-    tipo: 'TED'
-  };
+  contaOrigem: 0,
+  agenciaDestino: '',
+  numeroContaDestino: '',
+  valor: null as number | null,
+  tipoTransferencia: 'TED'  
+};
 
   valorDigitado: string = '';
 

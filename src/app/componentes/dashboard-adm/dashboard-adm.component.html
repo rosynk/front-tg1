@@ -24,11 +24,15 @@
         Usuários
       </a>
 
-      <span class="db-nav-section" style="margin-top: 8px;">Sistema</span>
-      <a class="db-nav-item" routerLink="/login">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <!-- Troque o <a> "Sair" antigo por este botão: -->
+      <button class="db-nav-item db-nav-logout" (click)="confirmarLogout()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
         Sair
-      </a>
+      </button>
     </nav>
 
     <div class="db-sidebar-footer">
@@ -241,4 +245,34 @@
     </div>
   </footer>
 
+  <!-- Modal de logout — adicione antes do fechamento de .db-wrap -->
+<div class="db-logout-overlay" *ngIf="mostrarModalLogout" (click)="cancelarLogout()">
+  <div class="db-logout-modal" (click)="$event.stopPropagation()">
+
+    <div class="db-logout-icon">
+      <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </div>
+
+    <div class="db-logout-badge">Painel Administrativo</div>
+    <h3>Encerrar sessão?</h3>
+    <p>Você sairá do acesso privilegiado. Certifique-se de que todas as avaliações foram salvas.</p>
+
+    <div class="db-logout-actions">
+      <button class="db-logout-cancel" (click)="cancelarLogout()">Cancelar</button>
+      <button class="db-logout-confirm" (click)="efetuarLogout()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sim, sair
+      </button>
+    </div>
+
+  </div>
+</div>
 </div>

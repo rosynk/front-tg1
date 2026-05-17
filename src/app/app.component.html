@@ -62,6 +62,16 @@
       </a>
 
       <button class="db-btn-quick">Quick Transfer</button>
+
+      <!-- Botão Logout -->
+      <button class="db-btn-logout" (click)="confirmarLogout()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sair
+      </button>
     </aside>
 
     <!-- ── Topbar ── -->
@@ -146,6 +156,25 @@
         <a href="#">Google Play</a>
       </div>
     </footer>
+
+    <!-- ── Modal de Logout ── -->
+    <div class="db-modal-overlay" *ngIf="mostrarModalLogout" (click)="cancelarLogout()">
+      <div class="db-modal" (click)="$event.stopPropagation()">
+        <div class="db-modal-icon">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </div>
+        <h3>Deseja sair?</h3>
+        <p>Você será desconectado da sua conta Bizi Bank.</p>
+        <div class="db-modal-actions">
+          <button class="db-modal-cancel" (click)="cancelarLogout()">Cancelar</button>
+          <button class="db-modal-confirm" (click)="efetuarLogout()">Sim, sair</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </ng-container>

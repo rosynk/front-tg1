@@ -3,6 +3,7 @@ import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
 import { SharedDataService } from './core/services/shared-data.service';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -13,31 +14,47 @@ import { SharedDataService } from './core/services/shared-data.service';
 })
 export class AppComponent implements OnInit {
   mostrarLayout = false;
+  mostrarModalLogout = false;
 
   constructor(
     public shared: SharedDataService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.router.events
-  .pipe(filter(event => event instanceof NavigationEnd))
-  .subscribe(() => {
-    let rota = this.activatedRoute.firstChild;
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        let rota = this.activatedRoute.firstChild;
 
-    while (rota?.firstChild) {
-      rota = rota.firstChild;
-    }
+        while (rota?.firstChild) {
+          rota = rota.firstChild;
+        }
 
-    const rotaPublica = rota?.snapshot.data?.['public'] === true;
-    const semLayout = rota?.snapshot.data?.['semLayout'] === true;
+        const rotaPublica = rota?.snapshot.data?.['public'] === true;
+        const semLayout = rota?.snapshot.data?.['semLayout'] === true;
 
-    this.mostrarLayout = !rotaPublica && !semLayout;
+        this.mostrarLayout = !rotaPublica && !semLayout;
 
-    if (this.mostrarLayout) {
-      this.shared.carregarConta();
-    }
-  });
+        if (this.mostrarLayout) {
+          this.shared.carregarConta();
+        }
+      });
+  }
+
+  confirmarLogout(): void {
+    this.mostrarModalLogout = true;
+  }
+
+  cancelarLogout(): void {
+    this.mostrarModalLogout = false;
+  }
+
+  efetuarLogout(): void {
+    this.mostrarModalLogout = false;
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
   }
 }

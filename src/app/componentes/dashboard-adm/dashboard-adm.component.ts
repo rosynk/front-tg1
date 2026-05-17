@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Proposta {
   id: number;
@@ -43,7 +44,8 @@ export class DashboardAdmComponent implements OnInit {
   erro = '';
   loadingAcao: number | null = null;
 
-  // Mapas por id de proposta para mensagens e observações independentes
+  mostrarModalLogout = false; // ← novo
+
   observacaoMap: { [id: number]: string } = {};
   msgSucessoMap: { [id: number]: string } = {};
   msgErroMap: { [id: number]: string } = {};
@@ -51,13 +53,31 @@ export class DashboardAdmComponent implements OnInit {
   imagemAmpliada: string | null = null;
 
   private readonly API_BASE = 'http://localhost:8086/api';
-  // URL base onde os arquivos de documentos estão servidos pelo backend
   private readonly DOCS_BASE = 'http://localhost:8086';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService // ← novo
+  ) {}
 
   ngOnInit() {
     this.carregarPropostas();
+  }
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  confirmarLogout(): void {
+    this.mostrarModalLogout = true;
+  }
+
+  cancelarLogout(): void {
+    this.mostrarModalLogout = false;
+  }
+
+  efetuarLogout(): void {
+    this.mostrarModalLogout = false;
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
   }
 
   // ── Getters de totais ──────────────────────────────────────────────────────
@@ -98,7 +118,6 @@ export class DashboardAdmComponent implements OnInit {
     });
   }
 
-  // ── Filtro de status ───────────────────────────────────────────────────────
   filtrarStatus(status: string) {
     this.filtroStatus = status;
     this.aplicarFiltro();
@@ -113,22 +132,17 @@ export class DashboardAdmComponent implements OnInit {
     }
   }
 
-  // ── Expandir/recolher card ────────────────────────────────────────────────
   toggleProposta(p: Proposta) {
     this.propostaSelecionada = this.propostaSelecionada?.id === p.id ? null : p;
   }
 
-  // ── URL de documento ──────────────────────────────────────────────────────
-  // O backend salva o caminho absoluto (ex: C:\...\arquivo.jpg) — ajuste se necessário.
-  // Para dev local, o ideal é o backend expor os arquivos via endpoint /docs/{filename}.
   getDocUrl(caminho: string): string {
     if (!caminho) return '';
     if (caminho.startsWith('http')) return caminho;
     const nomeArquivo = caminho.split(/[\\/]/).pop();
     return `${this.DOCS_BASE}/api/documentos/ver/${nomeArquivo}`;
-}
+  }
 
-  // ── Abrir/fechar imagem ampliada ──────────────────────────────────────────
   abrirImagem(url: string) {
     this.imagemAmpliada = url;
   }
@@ -137,7 +151,6 @@ export class DashboardAdmComponent implements OnInit {
     this.imagemAmpliada = null;
   }
 
-  // ── Avaliar proposta ──────────────────────────────────────────────────────
   avaliarProposta(id: number, novoStatus: 'APROVADA' | 'NEGADA') {
     this.loadingAcao = id;
     this.msgSucessoMap[id] = '';
@@ -150,7 +163,6 @@ export class DashboardAdmComponent implements OnInit {
 
     this.http.put<Proposta>(`${this.API_BASE}/propostas/${id}/avaliar`, body).subscribe({
       next: (propostaAtualizada) => {
-        // Atualiza localmente sem recarregar tudo
         const idx = this.propostas.findIndex(p => p.id === id);
         if (idx !== -1) this.propostas[idx] = propostaAtualizada;
         this.aplicarFiltro();
@@ -161,8 +173,6 @@ export class DashboardAdmComponent implements OnInit {
 
         this.loadingAcao = null;
         this.propostaSelecionada = propostaAtualizada;
-
-        // Limpa a mensagem após 4s
         setTimeout(() => { this.msgSucessoMap[id] = ''; }, 4000);
       },
       error: (err) => {

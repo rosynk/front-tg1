@@ -84,26 +84,32 @@
       <div class="new-key-box">
         <p class="new-key-box-title">Cadastrar Nova Chave</p>
 
-        <div class="pix-form-row">
-          <div class="pix-input-group">
-            <label>Tipo</label>
-            <select [(ngModel)]="novaChave.tipo">
-              <option value="CPF">CPF</option>
-              <option value="EMAIL">E-mail</option>
-              <option value="TELEFONE">Telefone</option>
-              <option value="ALEATORIA">Chave Aleatória</option>
-            </select>
-          </div>
-
-          <div class="pix-input-group">
-            <label>Dados da Chave</label>
-            <input type="text" [(ngModel)]="novaChave.valor" placeholder="Insira o dado da chave">
-          </div>
+        <div class="pix-input-group">
+          <label>Tipo de Chave</label>
+          <select [(ngModel)]="novaChave.tipo">
+            <option value="CPF">CPF</option>
+            <option value="EMAIL">E-mail</option>
+            <option value="TELEFONE">Telefone</option>
+            <option value="ALEATORIA">Chave Aleatória</option>
+          </select>
         </div>
+
+        <!-- Preview do valor que será cadastrado -->
+        <p class="key-preview">
+          <span>Será cadastrado:  </span>
+          <strong>{{ previsualizarChave() }}</strong>
+        </p>
 
         <button class="btn-bizi-slate-save" (click)="salvarNovaChave()">
           Salvar Chave
         </button>
+
+        <p *ngIf="erroChave" class="key-error">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ erroChave }}
+        </p>
       </div>
 
       <!-- Listagem de Chaves -->
@@ -134,7 +140,7 @@
       </div>
 
       <div class="db-tx-list" *ngIf="!loadingExtrato">
-        <div *ngFor="let tx of extrato?.transacoes | slice:0:5" class="history-item">
+        <div *ngFor="let tx of extrato | slice:0:5" class="history-item">
           <!-- Seu código de exibição da transação aqui -->
         </div>
 

@@ -27,8 +27,7 @@ export class TransferenciaPixComponent implements OnInit {
   loading: boolean = true;
   loadingExtrato: boolean = false;
   periodoSelecionado: number = 30;
-
-  // ✅ PROPRIEDADES PARA O JOSE APARECER (Resolve erro ngtsc 2339)
+  erroChave: string = '';
   usuarioLogado: any = null;
   usuarioNome: string = '';
 
@@ -60,7 +59,7 @@ export class TransferenciaPixComponent implements OnInit {
     // Tenta pegar 'nomeCompleto' (API), depois 'nome' (Guardian), ou fallback
     const userData = user as any;
     this.usuarioNome = userData?.nomeCompleto || user?.nome || 'Usuário Bizi';
-
+    console.log('👤 usuarioLogado completo:', JSON.stringify(user));
     console.log("👤 Dados para a tela:", {
       id: user?.id,
       nomeFinal: this.usuarioNome
@@ -165,66 +164,65 @@ export class TransferenciaPixComponent implements OnInit {
   erroTransferencia: string = '';
 
   executarTransferencia() {
-    // 1. Log de Auditoria Inicial
-    console.log('--- 🔍 DEBUG BIZI: INICIANDO TRANSFERÊNCIA ---');
+  this.erroTransferencia = '';
 
-    const payload = {
-      chavePixDestino: this.chavePix?.trim(),
-      valor: Number(this.valorPix)
-    };
+  const payload = {
+    chavePixDestino: this.chavePix?.trim(),
+    valor: Number(this.valorPix)
+  };
 
-    // 2. Verificação de tipos (Importante para o TCC/LGPD)
-    console.table({
-      'Campo': ['Chave Destino', 'Valor'],
-      'Valor': [payload.chavePixDestino, payload.valor],
-      'Tipo': [typeof payload.chavePixDestino, typeof payload.valor]
-    });
-
-    this.pixService.realizarTransferencia(payload).subscribe({
-      next: (res: any) => {
-        console.log('✅ [DEBUG BIZI] Resposta de Sucesso:', res);
-        alert('Pix enviado!');
-        this.carregarDados();
-      },
-      error: (err: any) => {
-        // 3. Log detalhado do Erro 400
-        console.error('❌ [DEBUG BIZI] Detalhes do Erro 400:');
-        console.log('Status:', err.status);
-        console.log('Corpo do Erro:', err.error); // Aqui o Spring diz qual campo falhou
-        this.erroTransferencia = err.error?.message || 'Erro na validação do servidor.';
-      }
-    });
+  if (!payload.chavePixDestino || payload.valor <= 0) {
+    this.erroTransferencia = 'Informe uma chave Pix e um valor maior que zero.';
+    return;
   }
 
-  salvarNovaChave(): void {
-    if (!this.novaChave.valor) {
-      alert("Por favor, insira o valor da chave.");
-      return;
+  this.loading = true;
+
+  this.pixService.realizarTransferencia(payload).subscribe({
+    next: (res: any) => {
+      console.log('Pix OK:', res);
+      alert(res?.message || 'Pix enviado!');
+
+      this.chavePix = '';
+      this.valorPix = 0;
+
+      this.carregarDados();
+      this.loading = false;
+    },
+    error: (err: any) => {
+      console.error('Erro Pix:', err);
+      this.erroTransferencia = err.error?.message || 'Erro ao realizar Pix.';
+      this.loading = false;
     }
+  });
+}
 
-    this.loading = true;
-    const dadosParaEnvio = {
-      tipo: this.novaChave.tipo,
-      valor: this.novaChave.valor
-    };
+  previsualizarChave(): string {
+  const tipo = this.novaChave.tipo;
+  const user = this.usuarioLogado as any;
+  if (tipo === 'CPF') return user?.id || 'Seu CPF';
+  if (tipo === 'EMAIL') return user?.email || 'Seu e-mail';
+  if (tipo === 'TELEFONE') return user?.telefone || 'Seu telefone';
+  return 'Gerada automaticamente';
+}
 
-    this.pixService.cadastrarChavePix(dadosParaEnvio).subscribe({
-      next: (res) => {
-        alert('Chave cadastrada com sucesso!');
-        this.novaChave = { tipo: 'CPF', valor: '' };
-        this.mudarAba('gerenciar'); // Isso chamará o carregarChaves() automaticamente
-      },
-      error: (err) => {
-        console.error('Erro no cadastro:', err);
-        alert('Erro ao cadastrar. Verifique o console para detalhes.');
-        this.loading = false;
-      }
-    });
-  }
+salvarNovaChave(): void {
+  this.loading = true;
+  this.erroChave = ''; 
 
-  /**
-   * ✅ COMPLEMENTO: Implementação do removerChave
-   */
+  this.pixService.cadastrarChavePix({ tipo: this.novaChave.tipo }).subscribe({
+    next: () => {
+      this.novaChave = { tipo: 'CPF', valor: '' };
+      this.carregarChaves();
+      this.loading = false;
+    },
+    error: (err) => {
+      this.erroChave = err.error?.message || 'Erro ao cadastrar chave.';
+      this.loading = false;
+    }
+  });
+}
+
   removerChave(id: any) {
     if (confirm('Deseja realmente excluir esta chave?')) {
       console.log('Removendo chave ID:', id);

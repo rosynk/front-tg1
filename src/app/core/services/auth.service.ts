@@ -6,10 +6,11 @@ import { isPlatformBrowser } from '@angular/common';
 
 // Interface do Usuário alinhada com o seu projeto Bizi Banco
 export interface User {
-  id: string;   // CPF ou ID único
+  id: string;
   email: string;
   nome: string;
   role: string;
+  telefone?: string; 
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,7 +87,8 @@ export class AuthService {
         id: String(payload.cpf || payload.sub),
         email: payload.sub,
         nome: payload.nome || 'Usuário Bizi',
-        role: payload.role || payload.roles || 'USER'
+        role: payload.role || 'USER',
+        telefone: payload.telefone || null 
       };
 
       this.currentUserSubject.next(user);

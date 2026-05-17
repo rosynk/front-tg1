@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
+
 @Component({
   selector: 'app-transferencia',
   standalone: true,
@@ -13,37 +14,36 @@ import { VisibilidadeValoresService } from '../../core/services/visibilidade-val
   styleUrl: './transferencia.component.css'
 })
 export class TransferenciaComponent implements OnInit {
-  // Dados dinâmicos do Usuário e Conta
-  usuarioLogado: User | null = null; //
+  usuarioLogado: User | null = null;
   extrato: any = null;
   conta: any = null;
 
-  // Propriedades de controle de estado (UI)
   loading = false;
   loadingTransfer = false;
   msgSucesso = '';
   msgErro = '';
 
-  // Objeto de dados para o formulário (TED JSON)
   transferenciaData = {
     contaOrigem: 0,
     agenciaDestino: '',
     numeroContaDestino: '',
-    valor: null as number | null
+    valor: null as number | null,
+    tipo: 'TED'
   };
+
+  valorDigitado: string = '';
 
   private readonly API_BASE = 'http://localhost:8086/api';
 
   constructor(
-  private http: HttpClient,
-  public authService: AuthService,
-  public visibilidadeValores: VisibilidadeValoresService
-) {}
+    private http: HttpClient,
+    public authService: AuthService,
+    public visibilidadeValores: VisibilidadeValoresService
+  ) {}
 
   ngOnInit() {
-    // 1. Subscreve ao usuário logado para atualizar o "Cofre Premium"
     this.authService.currentUser$.subscribe(user => {
-      this.usuarioLogado = user; //
+      this.usuarioLogado = user;
     });
 
     this.carregarDadosIniciais();
@@ -52,7 +52,6 @@ export class TransferenciaComponent implements OnInit {
   carregarDadosIniciais() {
     this.loading = true;
 
-    // 1. Busca extrato para saldo e transações (Saldo Atualizado)
     this.http.get<any>(`${this.API_BASE}/transacoes/extrato`).subscribe({
       next: (data) => {
         this.extrato = data;
@@ -64,7 +63,6 @@ export class TransferenciaComponent implements OnInit {
       }
     });
 
-    // 2. Busca dados da conta origem (Agência e Conta)
     this.http.get<any[]>(`${this.API_BASE}/contas`).subscribe({
       next: (contas) => {
         if (contas && contas.length > 0) {
@@ -77,6 +75,8 @@ export class TransferenciaComponent implements OnInit {
   }
 
   enviarTransferencia() {
+    this.transferenciaData.valor = this.valorNumerico;
+
     if (!this.transferenciaData.agenciaDestino || !this.transferenciaData.numeroContaDestino) {
       this.msgErro = 'Preencha os dados de destino.';
       return;
@@ -96,7 +96,7 @@ export class TransferenciaComponent implements OnInit {
         this.msgSucesso = 'Transferência realizada com sucesso!';
         this.loadingTransfer = false;
         this.limparFormulario();
-        this.carregarDadosIniciais(); // Atualiza saldo, agência e conta após o envio
+        this.carregarDadosIniciais();
       },
       error: (err) => {
         this.msgErro = err.error?.mensagem || 'Erro ao realizar transferência.';
@@ -105,13 +105,60 @@ export class TransferenciaComponent implements OnInit {
     });
   }
 
-  // Método para o botão da Sidebar
+  get valorFormatado(): string {
+    if (!this.valorDigitado) return '';
+
+    const numero = parseInt(this.valorDigitado, 10) / 100;
+
+    return numero.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
+
+  get valorNumerico(): number {
+    return parseInt(this.valorDigitado || '0', 10) / 100;
+  }
+
+  onDigitarValor(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    const apenasDigitos = input.value.replace(/\D/g, '');
+    this.valorDigitado = apenasDigitos;
+
+    input.value = this.valorFormatado;
+    this.transferenciaData.valor = this.valorNumerico;
+  }
+
+  onTeclaValor(event: KeyboardEvent) {
+    const permitidas = ['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight'];
+
+    if (permitidas.includes(event.key)) {
+      if (event.key === 'Backspace') {
+        this.valorDigitado = this.valorDigitado.slice(0, -1);
+
+        const input = event.target as HTMLInputElement;
+        input.value = this.valorFormatado;
+
+        this.transferenciaData.valor = this.valorNumerico;
+        event.preventDefault();
+      }
+
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   testeNavegacao() {
     console.log('Navegação funcionando corretamente!');
     alert('Sistema de navegação Bizi Bank ativo.');
   }
 
   private limparFormulario() {
+    this.valorDigitado = '';
     this.transferenciaData.valor = null;
     this.transferenciaData.agenciaDestino = '';
     this.transferenciaData.numeroContaDestino = '';

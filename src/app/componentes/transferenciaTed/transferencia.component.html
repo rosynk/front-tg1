@@ -11,31 +11,24 @@
 
         Saldo disponível para envio
 
-        <button
-          type="button"
-          class="btn-eye"
-          (click)="visibilidadeValores.alternar()"
+        <button type="button" class="btn-eye" (click)="visibilidadeValores.alternar()"
           [attr.aria-label]="visibilidadeValores.mostrarValores ? 'Ocultar valores' : 'Mostrar valores'">
-
           <svg *ngIf="visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
           </svg>
-
           <svg *ngIf="!visibilidadeValores.mostrarValores" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"/>
             <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 11 8 11 8a21.96 21.96 0 0 1-3.17 4.13"/>
-            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/>
-            <path d="M1 1l22 22"/>
+            <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/>
           </svg>
         </button>
       </p>
 
-     <h1 class="db-balance-val">
-      {{ visibilidadeValores.mostrarValores
-        ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
-        : 'R$ •••••' }}
-    </h1>
+      <h1 class="db-balance-val">
+        {{ visibilidadeValores.mostrarValores
+          ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
+          : 'R$ •••••' }}
+      </h1>
 
       <div class="db-acct-info" *ngIf="conta">
         <span>Origem: Ag. {{ conta.numeroAgencia }}</span>
@@ -45,55 +38,55 @@
     </div>
   </div>
 
-  <!-- Formulário TED -->
+  <!-- Formulário -->
   <section class="db-activity">
 
     <div class="db-activity-head">
-      <h2>Nova Transferência TED</h2>
+      <h2>Nova Transferência</h2>
     </div>
 
-    <div *ngIf="msgSucesso" class="ted-alert ted-alert-success">
-      {{ msgSucesso }}
+    <!-- Seletor DOC / TED -->
+    <div class="ted-type-selector">
+      <label class="ted-type-option" [class.active]="transferenciaData.tipo === 'TED'">
+        <input type="radio" name="tipoTransferencia" value="TED" [(ngModel)]="transferenciaData.tipo">
+        <div class="ted-type-content">
+          <span class="ted-type-title">TED</span>
+          <span class="ted-type-desc">Disponível em minutos</span>
+        </div>
+      </label>
+
+      <label class="ted-type-option" [class.active]="transferenciaData.tipo === 'DOC'">
+        <input type="radio" name="tipoTransferencia" value="DOC" [(ngModel)]="transferenciaData.tipo">
+        <div class="ted-type-content">
+          <span class="ted-type-title">DOC</span>
+          <span class="ted-type-desc">Disponível no próximo dia útil</span>
+        </div>
+      </label>
     </div>
 
-    <div *ngIf="msgErro" class="ted-alert ted-alert-error">
-      {{ msgErro }}
-    </div>
+    <div *ngIf="msgSucesso" class="ted-alert ted-alert-success">{{ msgSucesso }}</div>
+    <div *ngIf="msgErro" class="ted-alert ted-alert-error">{{ msgErro }}</div>
 
     <div class="ted-form">
 
       <div class="ted-form-row">
-        <div class="ted-input-group ted-agency">
+        <div class="ted-input-group">
           <label>Agência</label>
-          <input
-            type="text"
-            [(ngModel)]="transferenciaData.agenciaDestino"
-            placeholder="0001"
-            maxlength="4">
+          <input type="text" [(ngModel)]="transferenciaData.agenciaDestino" placeholder="0001" maxlength="4">
         </div>
-
         <div class="ted-input-group">
           <label>Conta de Destino</label>
-          <input
-            type="text"
-            [(ngModel)]="transferenciaData.numeroContaDestino"
-            placeholder="12345-6">
+          <input type="text" [(ngModel)]="transferenciaData.numeroContaDestino" placeholder="12345-6">
         </div>
       </div>
 
       <div class="ted-input-group">
         <label>Valor (R$)</label>
-        <input
-          type="number"
-          [(ngModel)]="transferenciaData.valor"
-          placeholder="0,00">
+        <input type="text" [value]="valorFormatado" (input)="onDigitarValor($event)" (keydown)="onTeclaValor($event)" placeholder="R$ 0,00">
       </div>
 
-      <button
-        class="ted-send-btn"
-        [disabled]="loadingTransfer"
-        (click)="enviarTransferencia()">
-        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar TED' }}
+      <button class="ted-send-btn" [disabled]="loadingTransfer" (click)="enviarTransferencia()">
+        {{ loadingTransfer ? 'Processando...' : 'Confirmar e Enviar ' + transferenciaData.tipo }}
       </button>
 
     </div>

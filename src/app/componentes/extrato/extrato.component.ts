@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LoginService } from '../../core/services/login.service';
 import { ExtratoService, ExtratoResponse } from '../../core/services/extrato.service';
@@ -11,7 +11,7 @@ import { VisibilidadeValoresService } from '../../core/services/visibilidade-val
 @Component({
   selector: 'app-extrato',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './extrato.component.html',
   styleUrl: './extrato.component.css',
   providers: [CurrencyPipe, DatePipe]
@@ -32,27 +32,37 @@ export class ExtratoComponent implements OnInit {
 
   usuarioNome: string = '';
   usuarioLogado: any = null; 
+  private readonly API_BASE = 'http://localhost:8086/api';
+
   constructor(
-  private loginService: LoginService,
-  private extratoService: ExtratoService,
-  private authService: AuthService,
-  public visibilidadeValores: VisibilidadeValoresService
-) { }
+    private http: HttpClient,
+    private loginService: LoginService,
+    private extratoService: ExtratoService,
+    private authService: AuthService,
+    public visibilidadeValores: VisibilidadeValoresService
+  ) { }
 
   ngOnInit(): void {
-    // MÉTODO INCLUÍDO: Sincronização em tempo real com o AuthService
     this.authService.currentUser$.subscribe(user => {
       this.usuarioLogado = user;
-      this.usuarioNome = user?.nome || 'Jose da Paixao Sa Santos';
+      this.usuarioNome = user?.nome || 'Usuário Bizi';
+    });
+
+    // ← adiciona isso
+    this.http.get<any[]>(`${this.API_BASE}/contas`).subscribe({
+      next: (contas) => {
+        if (contas && contas.length > 0) {
+          this.conta = contas[0];
+        }
+      },
+      error: (err) => console.error('Erro ao carregar conta:', err)
     });
 
     const hoje = new Date();
     const trintaDiasAtras = new Date();
     trintaDiasAtras.setDate(hoje.getDate() - 30);
-
     this.dataFim = hoje.toISOString().split('T')[0];
     this.dataInicio = trintaDiasAtras.toISOString().split('T')[0];
-
     this.carregarDados(30);
   }
 

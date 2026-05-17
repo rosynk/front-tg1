@@ -95,82 +95,76 @@ constructor(
 
   // --- Lógica de Dados ---
   carregarDados() {
-    this.loading = true;
+  this.loading = true;
 
-    // 1. Busca Dados da Conta primeiro para ter o saldo atualizado
-    this.http.get<Conta[]>(`${this.API_BASE}/contas`).subscribe({
-      next: (contas) => {
-        if (contas && contas.length > 0) {
-          this.conta = contas[0];
-          this.transferenciaData.idContaOrigem = this.conta.id;
-
-          // 2. Só busca o extrato após ter os dados da conta (para evitar undefined no saldo)
-          this.buscarExtrato();
-        }
-      },
-      error: (err) => this.tratarErro(err)
-    });
-  }
+  this.http.get<Conta[]>(`${this.API_BASE}/contas`).subscribe({
+    next: (contas) => {
+      if (contas && contas.length > 0) {
+        this.conta = contas[0];
+        console.log('🏦 Conta carregada:', JSON.stringify(this.conta)); 
+        this.transferenciaData.idContaOrigem = this.conta.id;
+        this.buscarExtrato();
+      }
+    },
+    error: (err) => this.tratarErro(err)
+  });
+}
 
 private buscarExtrato() {
   this.loading = true;
-
-  // Adicionamos um timestamp (?t=...) para garantir que a requisição vá ao servidor e não ao cache
   const timestamp = new Date().getTime();
+  const cpfLogado = this.conta?.usuario?.cpf; 
 
   this.http.get<Transacao[]>(`${this.API_BASE}/transacoes/extrato?t=${timestamp}`).subscribe({
     next: (data) => {
-      // 1. Criamos a nova lista formatada
-      const transacoesFormatadas = (data || []).map(t => {
+    console.log('📋 Transações brutas:', JSON.stringify(data?.slice(0, 2))); 
+    const cpfLogado = this.conta?.usuario?.cpf;
+    console.log('👤 CPF logado:', cpfLogado); 
+      const transacoesFormatadas = (data || []).map((t: any) => {
         const tipo = t.tipoTransacao || '';
         const nome = t.nomeContraparte || t.cpfDestino || 'Destinatário';
 
-        let tituloExibicao = '';
-        const ehSaida = tipo.includes('ENVIADA') || tipo.endsWith('_SAIDA') || tipo.includes('SAQUE') || tipo.includes('PAGAMENTO');
+        // ← Determina direção baseado no CPF, não só no tipo
+       const ehSaida = tipo.includes('SAIDA') || tipo.includes('SAQUE') || tipo.includes('PAGAMENTO');
+        const valorFinal = ehSaida ? -Math.abs(t.valor) : Math.abs(t.valor);
 
-        if (tipo.includes('RECEBIDA')) {
-          tituloExibicao = `Recebido de ${nome}`;
-        } else if (tipo.includes('ENVIADA')) {
-          tituloExibicao = `Transferência para ${nome}`;
-        } else if (tipo.includes('PAGAMENTO')) {
-          tituloExibicao = `Pagamento para ${nome}`;
+        let tituloExibicao = '';
+        if (tipo.includes('PIX') || tipo.includes('ENTRADA') || tipo.includes('RECEBIDA')) {
+          tituloExibicao = ehSaida ? `Pix enviado para ${nome}` : `Pix recebido de ${nome}`;
+        } else if (tipo.includes('TED') || tipo.includes('TRANSFERENCIA')) {
+          tituloExibicao = ehSaida ? `Transferência para ${nome}` : `Transferência de ${nome}`;
         } else if (tipo.includes('SAQUE')) {
-          tituloExibicao = `Saque Realizado`;
+          tituloExibicao = 'Saque Realizado';
         } else if (tipo.includes('DEPOSITO')) {
-          tituloExibicao = `Depósito em Conta`;
+          tituloExibicao = 'Depósito em Conta';
         } else {
-          tituloExibicao = `Transação: ${nome}`;
+          tituloExibicao = nome;
         }
 
-        return {
-          ...t,
-          tituloDinamico: tituloExibicao,
-          valor: ehSaida ? -Math.abs(t.valor) : Math.abs(t.valor)
-        };
+        return { ...t, tituloDinamico: tituloExibicao, valor: valorFinal };
       });
 
-      // 2. Ordenação rigorosa por data e hora (decrescente)
-      transacoesFormatadas.sort((a, b) => {
-        return new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime();
-      });
+      transacoesFormatadas.sort((a, b) =>
+        new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime()
+      );
 
-      // 3. Resetamos o objeto extrato com uma nova referência para o Angular detectar a mudança
       this.extrato = {
         titular: this.conta?.usuario?.nomeCompleto || 'Usuário Bizi',
         saldoAtual: this.conta?.saldo || 0,
-        transacoes: [...transacoesFormatadas] 
+        transacoes: [...transacoesFormatadas]
       };
-      this.calcularResumoMensal(this.extrato.transacoes);
 
+      this.calcularResumoMensal(this.extrato.transacoes);
       this.loading = false;
-      console.log('✅ Extrato atualizado com sucesso:', this.extrato.transacoes);
     },
+    
     error: (err) => {
       this.tratarErro(err);
       this.loading = false;
     }
   });
 }
+
   enviarTransferencia() {
     if (!this.transferenciaData.valor || this.transferenciaData.valor <= 0) {
       this.msgErro = 'Informe um valor válido.';
@@ -234,11 +228,8 @@ private buscarExtrato() {
     .reduce((total, tx) => total + Math.abs(tx.valor), 0);
 
   this.percentualEntradasMes = this.calcularPercentual(this.totalEntradasMes, this.conta?.saldo || 0);
-this.percentualSaidasMes = this.calcularPercentual(this.totalSaidasMes, this.conta?.saldo || 0);
-
-this.percentualSaldoMes = this.calcularPercentual(
-  this.totalEntradasMes - this.totalSaidasMes,
-  this.conta?.saldo || 0
+  this.percentualSaidasMes = this.calcularPercentual(this.totalSaidasMes, this.conta?.saldo || 0);this.percentualSaldoMes = this.calcularPercentual(
+  this.totalEntradasMes - this.totalSaidasMes,this.conta?.saldo || 0
 );
 }
 

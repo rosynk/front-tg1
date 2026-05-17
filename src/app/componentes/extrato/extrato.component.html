@@ -27,10 +27,10 @@
       </p>
 
       <h1 class="db-balance-val">
-      {{ visibilidadeValores.mostrarValores
-        ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
-        : 'R$ •••••' }}
-    </h1>
+        {{ visibilidadeValores.mostrarValores
+          ? (conta?.saldo != null ? (conta.saldo | currency:'BRL':'symbol':'1.2-2') : 'R$ 0,00')
+          : 'R$ •••••' }}
+      </h1>
 
       <div class="db-acct-info" *ngIf="conta">
         <span>Ag. {{ conta.numeroAgencia }}</span>

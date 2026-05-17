@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { PixService } from '../../core/services/pix.service';
 import { AuthService } from '../../core/services/auth.service';
 import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
+import { ComprovantePdfService } from '../../core/services/comprovante-pdf.service';
 
 @Component({
   selector: 'app-transferencia-pix',
@@ -53,7 +54,8 @@ export class TransferenciaPixComponent implements OnInit {
     private pixService: PixService,
     private authService: AuthService,
     private http: HttpClient,
-    public visibilidadeValores: VisibilidadeValoresService
+    public visibilidadeValores: VisibilidadeValoresService,
+    private comprovantePdf: ComprovantePdfService
   ) {}
 
   ngOnInit(): void {
@@ -136,33 +138,55 @@ export class TransferenciaPixComponent implements OnInit {
 
   // --- CONFIRMA E ENVIA ---
   confirmarPix(): void {
-    this.erroTransferencia = '';
-    this.sucessoTransferencia = '';
-
-    const payload = {
-      chavePixDestino: this.chavePix.trim(),
-      valor: this.valorNumerico
-    };
-
-    this.loading = true;
-
-    this.pixService.realizarTransferencia(payload).subscribe({
-      next: (res: any) => {
-        this.modalAberto = false;
-        this.sucessoTransferencia = res?.message || 'Pix enviado com sucesso!';
-        this.chavePix = '';
-        this.valorDigitado = '';
-        this.carregarDados();
-        this.loading = false;
-        setTimeout(() => { this.sucessoTransferencia = ''; }, 4000);
-      },
-      error: (err: any) => {
-        this.modalAberto = false;
-        this.erroTransferencia = err.error?.message || err.error?.mensagem || 'Erro ao realizar Pix. Tente novamente.';
-        this.loading = false;
-      }
-    });
-  }
+  this.erroTransferencia = '';
+  this.sucessoTransferencia = '';
+ 
+  const payload = {
+    chavePixDestino: this.chavePix.trim(),
+    valor: this.valorNumerico
+  };
+ 
+  this.loading = true;
+ 
+  this.pixService.realizarTransferencia(payload).subscribe({
+   next: (res: any) => {
+  console.log('CONTA NO MOMENTO DO COMPROVANTE:', JSON.stringify(this.conta));
+  console.log('USUARIO LOGADO:', JSON.stringify(this.usuarioLogado));
+      this.modalAberto = false;
+      this.sucessoTransferencia = res?.message || 'Pix enviado com sucesso!';
+ 
+      // ── Gera o comprovante PDF ──
+      this.comprovantePdf.gerarComprovante({
+        tipo: 'PIX',
+        valor: this.valorNumerico,
+        remetente: {
+          nome: this.conta?.extrato?.[0]?.contaBancaria?.usuario?.nomeCompleto
+          || (this.usuarioLogado as any)?.nomeCompleto
+          || 'Você',
+          agencia: this.conta?.numeroAgencia || '',
+          conta: this.conta?.numeroConta || '',
+          tipoConta: this.conta?.tipoConta
+        },
+        destinatario: {
+          nome: this.destinatarioNome,
+          chave: this.destinatarioChave
+        },
+        dataHora: new Date()
+      });
+ 
+      this.chavePix = '';
+      this.valorDigitado = '';
+      this.carregarDados();
+      this.loading = false;
+      setTimeout(() => { this.sucessoTransferencia = ''; }, 4000);
+    },
+    error: (err: any) => {
+      this.modalAberto = false;
+      this.erroTransferencia = err.error?.message || err.error?.mensagem || 'Erro ao realizar Pix. Tente novamente.';
+      this.loading = false;
+    }
+  });
+}
 
   // --- CHAVES ---
   formatarTipoChave(tipo: string): string {

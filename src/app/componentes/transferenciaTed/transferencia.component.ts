@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth.service';
 import { VisibilidadeValoresService } from '../../core/services/visibilidade-valores.service';
+import { ComprovantePdfService } from '../../core/services/comprovante-pdf.service';
 
 @Component({
   selector: 'app-transferencia',
@@ -44,7 +45,8 @@ export class TransferenciaComponent implements OnInit {
   constructor(
     private http: HttpClient,
     public authService: AuthService,
-    public visibilidadeValores: VisibilidadeValoresService
+    public visibilidadeValores: VisibilidadeValoresService,
+    private comprovantePdf: ComprovantePdfService
   ) {}
 
   ngOnInit() {
@@ -121,25 +123,44 @@ export class TransferenciaComponent implements OnInit {
 
   // --- Confirma e envia após o modal ---
   confirmarTransferencia() {
-    this.loadingTransfer = true;
-    this.msgSucesso = '';
-    this.msgErro = '';
-
-    this.http.post(`${this.API_BASE}/transferencias`, this.transferenciaData).subscribe({
-      next: () => {
-        this.modalAberto = false;
-        this.msgSucesso = 'Transferência realizada com sucesso!';
-        this.loadingTransfer = false;
-        this.limparFormulario();
-        this.carregarConta();
-      },
-      error: (err) => {
-        this.modalAberto = false;
-        this.msgErro = err.error?.mensagem || 'Erro ao realizar transferência.';
-        this.loadingTransfer = false;
-      }
-    });
-  }
+  this.loadingTransfer = true;
+  this.msgSucesso = '';
+  this.msgErro = '';
+ 
+  this.http.post(`${this.API_BASE}/transferencias`, this.transferenciaData).subscribe({
+    next: () => {
+      this.modalAberto = false;
+      this.msgSucesso = 'Transferência realizada com sucesso!';
+      this.loadingTransfer = false;
+ 
+      // ── Gera o comprovante PDF ──
+      this.comprovantePdf.gerarComprovante({
+        tipo: this.transferenciaData.tipoTransferencia as 'TED' | 'DOC',
+        valor: this.transferenciaData.valor!,
+        remetente: {
+          nome: this.conta?.usuario?.nomeCompleto || 'Você',
+          agencia: this.conta?.numeroAgencia || '',
+          conta: this.conta?.numeroConta || '',
+          tipoConta: this.conta?.tipoConta
+        },
+        destinatario: {
+          nome: this.destinatarioNome,
+          agencia: this.transferenciaData.agenciaDestino,
+          conta: this.transferenciaData.numeroContaDestino
+        },
+        dataHora: new Date()
+      });
+ 
+      this.limparFormulario();
+      this.carregarConta();
+    },
+    error: (err) => {
+      this.modalAberto = false;
+      this.msgErro = err.error?.mensagem || 'Erro ao realizar transferência.';
+      this.loadingTransfer = false;
+    }
+  });
+}
 
   // --- Getters de valor formatado ---
   get valorFormatado(): string {

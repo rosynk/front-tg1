@@ -1,124 +1,147 @@
-<!-- app.component.html -->
-<div class="db-wrap">
+<ng-container *ngIf="mostrarLayout; else rotaPublica">
+  <div class="db-wrap">
 
-  <!-- ── Sidebar esquerda ── -->
-  <aside class="db-sidebar">
-    <div class="db-brand">Bizi Bank</div>
+    <!-- ── Sidebar esquerda ── -->
+    <aside class="db-sidebar">
+      <div class="db-brand">Bizi Bank</div>
 
-    <div class="db-user">
-      <div class="db-avatar">{{ (shared.conta?.usuario?.nomeCompleto || 'U')[0].toUpperCase() }}</div>
-      <div>
-        <div class="db-user-name">{{ shared.conta?.usuario?.nomeCompleto || 'Carregando...' }}</div>
-        <div class="db-user-tag">Cofre Premium · Verificado</div>
+      <div class="db-user">
+        <div class="db-avatar">{{ (shared.conta?.usuario?.nomeCompleto || 'U')[0].toUpperCase() }}</div>
+        <div>
+          <div class="db-user-name">{{ shared.conta?.usuario?.nomeCompleto || 'Carregando...' }}</div>
+          <div class="db-user-tag">Cofre Premium · Verificado</div>
+        </div>
       </div>
-    </div>
 
-    <nav class="db-nav">
-      <a class="db-nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
-        Accounts
-      </a>
-      <a class="db-nav-item" routerLink="/transferencia-pix" routerLinkActive="active">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3L3 12l9 9 9-9-9-9z"/><path d="M9 12l3-3 3 3-3 3-3-3z"/>
-        </svg>
-        Pix
-      </a>
-      <a class="db-nav-item" routerLink="/extrato" routerLinkActive="active">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-          <line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        Extrato
-      </a>
-      <a class="db-nav-item" routerLink="/transferencia" routerLinkActive="active">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-        Transferir (DOC/TED)
-      </a>
-      <a class="db-nav-item">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-          <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>
-        </svg>
-        Boletos
-      </a>
-    </nav>
+      <nav class="db-nav">
+        <a class="db-nav-item" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+          Accounts
+        </a>
 
-    <button class="db-btn-quick">Quick Transfer</button>
-  </aside>
+        <a class="db-nav-item" routerLink="/transferencia-pix" routerLinkActive="active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3L3 12l9 9 9-9-9-9z"/><path d="M9 12l3-3 3 3-3 3-3-3z"/>
+          </svg>
+          Pix
+        </a>
 
-  <!-- ── Topbar ── -->
-  <header class="db-topbar">
-    <nav class="db-topbar-nav">
-      <a href="#">Produtos</a>
-      <a href="#">Segurança</a>
-      <a href="#">Suporte</a>
-    </nav>
-    <div class="db-topbar-right">
-      <div class="db-search">
-        <svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="1.75" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input type="text" placeholder="Buscar..." />
+        <a class="db-nav-item" routerLink="/extrato" routerLinkActive="active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Extrato
+        </a>
+
+        <a class="db-nav-item" routerLink="/transferencia" routerLinkActive="active">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          Transferir (DOC/TED)
+        </a>
+
+        <a class="db-nav-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>
+          </svg>
+          Boletos
+        </a>
+      </nav>
+
+      <button class="db-btn-quick">Quick Transfer</button>
+    </aside>
+
+    <!-- ── Topbar ── -->
+    <header class="db-topbar">
+      <nav class="db-topbar-nav">
+        <a href="#">Produtos</a>
+        <a href="#">Segurança</a>
+        <a href="#">Suporte</a>
+      </nav>
+
+      <div class="db-topbar-right">
+        <div class="db-search">
+          <svg width="13" height="13" fill="none" stroke="#9ca3af" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" placeholder="Buscar..." />
+        </div>
+
+        <button class="db-btn-login" routerLink="/login">Entrar</button>
       </div>
-      <button class="db-btn-login" routerLink="/login">Entrar</button>
-    </div>
-  </header>
+    </header>
 
-  <!-- ── Conteúdo da rota atual ── -->
-  <main class="db-main">
-    <router-outlet></router-outlet>
-  </main>
+    <!-- ── Conteúdo da rota atual ── -->
+    <main class="db-main">
+      <router-outlet></router-outlet>
+    </main>
 
-  <!-- ── Sidebar direita ── -->
-  <aside class="db-right">
-    <p style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;margin-bottom:8px">Ações rápidas</p>
+    <!-- ── Sidebar direita ── -->
+    <aside class="db-right">
+      <p style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;margin-bottom:8px">Ações rápidas</p>
 
-    <div class="db-invest">
-      <div class="db-invest-sub">Portfólio</div>
-      <div class="db-invest-label">Meus Investimentos</div>
-      <div class="db-invest-val">R$ 18.400,00</div>
-      <div class="db-invest-bar-row">
-        <span>Rendimento</span><span class="db-invest-pct">+11,3%</span>
+      <div class="db-invest">
+        <div class="db-invest-sub">Portfólio</div>
+        <div class="db-invest-label">Meus Investimentos</div>
+        <div class="db-invest-val">R$ 18.400,00</div>
+
+        <div class="db-invest-bar-row">
+          <span>Rendimento</span>
+          <span class="db-invest-pct">+11,3%</span>
+        </div>
+
+        <div class="db-invest-track">
+          <div class="db-invest-fill"></div>
+        </div>
+
+        <button class="db-btn-optimize">Otimizar carteira →</button>
       </div>
-      <div class="db-invest-track"><div class="db-invest-fill"></div></div>
-      <button class="db-btn-optimize">Otimizar carteira →</button>
-    </div>
 
-    <div class="db-vault">
-      <div class="db-vault-head">
-        <svg width="14" height="14" fill="rgba(163,230,192,0.8)" viewBox="0 0 24 24">
-          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-        </svg>
-        Kinetic Vault
+      <div class="db-vault">
+        <div class="db-vault-head">
+          <svg width="14" height="14" fill="rgba(163,230,192,0.8)" viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+          </svg>
+          Kinetic Vault
+        </div>
+
+        <p class="db-vault-desc">Seus ativos protegidos por camadas criptográficas avançadas.</p>
+
+        <div class="db-vault-status">
+          <span class="db-status-lbl">Status de segurança</span>
+          <span class="db-status-badge">Ativo</span>
+        </div>
       </div>
-      <p class="db-vault-desc">Seus ativos protegidos por camadas criptográficas avançadas.</p>
-      <div class="db-vault-status">
-        <span class="db-status-lbl">Status de segurança</span>
-        <span class="db-status-badge">Ativo</span>
+    </aside>
+
+    <!-- ── Footer ── -->
+    <footer class="db-footer">
+      <div class="db-footer-brand">
+        <strong>Bizi Bank</strong>
+        <small>© 2025 Bizi Bank. Regulamentado pelo Banco Central do Brasil.</small>
       </div>
-    </div>
-  </aside>
 
-  <!-- ── Footer ── -->
-  <footer class="db-footer">
-    <div class="db-footer-brand">
-      <strong>Bizi Bank</strong>
-      <small>© 2025 Bizi Bank. Regulamentado pelo Banco Central do Brasil.</small>
-    </div>
-    <div class="db-footer-col">
-      <span>Plataforma</span>
-      <a href="#">Privacidade</a><a href="#">Termos</a>
-    </div>
-    <div class="db-footer-col">
-      <span>App Mobile</span>
-      <a href="#">App Store</a><a href="#">Google Play</a>
-    </div>
-  </footer>
+      <div class="db-footer-col">
+        <span>Plataforma</span>
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+      </div>
 
-</div>
+      <div class="db-footer-col">
+        <span>App Mobile</span>
+        <a href="#">App Store</a>
+        <a href="#">Google Play</a>
+      </div>
+    </footer>
+
+  </div>
+</ng-container>
+
+<ng-template #rotaPublica>
+  <router-outlet></router-outlet>
+</ng-template>

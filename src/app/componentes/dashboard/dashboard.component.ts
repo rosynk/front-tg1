@@ -48,6 +48,12 @@ export class DashboardComponent implements OnInit {
   conta: Conta | null = null;
   loading = true;
   erro = '';
+  percentualSaldoMes = 0;
+
+  totalEntradasMes = 0;
+  totalSaidasMes = 0;
+  percentualEntradasMes = 0;
+  percentualSaidasMes = 0;
 
   // --- Dados da Transferência ---
   transferenciaData = {
@@ -152,8 +158,9 @@ private buscarExtrato() {
       this.extrato = {
         titular: this.conta?.usuario?.nomeCompleto || 'Usuário Bizi',
         saldoAtual: this.conta?.saldo || 0,
-        transacoes: [...transacoesFormatadas] // Usamos o spread operator aqui
+        transacoes: [...transacoesFormatadas] 
       };
+      this.calcularResumoMensal(this.extrato.transacoes);
 
       this.loading = false;
       console.log('✅ Extrato atualizado com sucesso:', this.extrato.transacoes);
@@ -204,4 +211,39 @@ private buscarExtrato() {
       this.erro = 'Erro ao carregar dados do servidor.';
     }
   }
+
+  private calcularResumoMensal(transacoes: Transacao[]): void {
+  const agora = new Date();
+  const mesAtual = agora.getMonth();
+  const anoAtual = agora.getFullYear();
+
+  const transacoesDoMes = (transacoes || []).filter((tx: any) => {
+    const dataTransacao = new Date(tx.dataHora);
+    return (
+      dataTransacao.getMonth() === mesAtual &&
+      dataTransacao.getFullYear() === anoAtual
+    );
+  });
+
+  this.totalEntradasMes = transacoesDoMes
+    .filter(tx => tx.valor > 0)
+    .reduce((total, tx) => total + tx.valor, 0);
+
+  this.totalSaidasMes = transacoesDoMes
+    .filter(tx => tx.valor < 0)
+    .reduce((total, tx) => total + Math.abs(tx.valor), 0);
+
+  this.percentualEntradasMes = this.calcularPercentual(this.totalEntradasMes, this.conta?.saldo || 0);
+this.percentualSaidasMes = this.calcularPercentual(this.totalSaidasMes, this.conta?.saldo || 0);
+
+this.percentualSaldoMes = this.calcularPercentual(
+  this.totalEntradasMes - this.totalSaidasMes,
+  this.conta?.saldo || 0
+);
+}
+
+private calcularPercentual(valor: number, saldo: number): number {
+  if (!saldo || saldo <= 0) return 0;
+  return (valor / saldo) * 100;
+}
 } // Fim da Classe

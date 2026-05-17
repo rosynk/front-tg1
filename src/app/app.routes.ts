@@ -14,9 +14,9 @@ export const routes: Routes = [
   { path: '', redirectTo: '/welcome', pathMatch: 'full' },
 
   // 2. Rotas Públicas
-  { path: 'welcome', component: WelcomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'sign-in', component: SignInComponent },
+  { path: 'welcome', component: WelcomeComponent, data: { public: true } },
+  { path: 'login', component: LoginComponent, data: { public: true } },
+  { path: 'sign-in', component: SignInComponent, data: { public: true } },
 
   // 3. Rotas Protegidas (Dashboard, Transferência e Extrato)
   {
@@ -51,13 +51,16 @@ export const routes: Routes = [
     data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'] }
   },
 
-  {
-    path: 'dashboard-adm',
-    component: DashboardAdmComponent,
-    canActivate: [authGuard],
-    title: 'Painel ADM - Bizi Bank',
-    data: { roles: ['ROLE_ADMIN'] }
-  },
+ {
+  path: 'dashboard-adm',
+  component: DashboardAdmComponent,
+  canActivate: [authGuard],
+  title: 'Painel ADM - Bizi Bank',
+  data: {
+    roles: ['ROLE_ADMIN'],
+    semLayout: true
+  }
+},
 
   // 4. Rota de Wildcard (DEVE SER SEMPRE A ÚLTIMA)
   { path: '**', redirectTo: '/welcome' }

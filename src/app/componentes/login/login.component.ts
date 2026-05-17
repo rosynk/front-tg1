@@ -80,6 +80,6 @@ export class LoginComponent {
   }
 
   navegarParaSignIn(): void {
-    this.router.navigate(['/cadastro']);
+    this.router.navigate(['/sign-in']);
   }
 }

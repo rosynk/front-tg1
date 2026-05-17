@@ -40,7 +40,14 @@
         <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M12 19V5M5 12l7-7 7 7"/>
         </svg>
-        {{ visibilidadeValores.mostrarValores ? '+2,4% este mês' : '•••• este mês' }}
+
+        <ng-container *ngIf="visibilidadeValores.mostrarValores; else saldoMesOculto">
+            {{ percentualSaldoMes >= 0 ? '+' : '' }}{{ percentualSaldoMes | number:'1.1-1' }}% este mês
+          </ng-container>
+
+          <ng-template #saldoMesOculto>
+            •••• este mês
+          </ng-template>
       </span>
 
       <div class="db-acct-info" *ngIf="conta">
@@ -58,20 +65,28 @@
     <div class="db-stat">
       <div class="db-stat-lbl">Entradas (mês)</div>
       <div class="db-stat-val">
-        {{ visibilidadeValores.mostrarValores ? 'R$ 4.280' : 'R$ •••••' }}
+        {{ visibilidadeValores.mostrarValores
+          ? (totalEntradasMes | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
       </div>
       <div class="db-stat-delta">
-        {{ visibilidadeValores.mostrarValores ? '↑ 8,2%' : '••••' }}
+        {{ visibilidadeValores.mostrarValores
+          ? ('↑ ' + (percentualEntradasMes | number:'1.1-1') + '%')
+          : '••••' }}
       </div>
     </div>
 
     <div class="db-stat">
       <div class="db-stat-lbl">Saídas (mês)</div>
       <div class="db-stat-val">
-        {{ visibilidadeValores.mostrarValores ? 'R$ 1.940' : 'R$ •••••' }}
+        {{ visibilidadeValores.mostrarValores
+          ? (totalSaidasMes | currency:'BRL':'symbol':'1.2-2')
+          : 'R$ •••••' }}
       </div>
       <div class="db-stat-delta neg">
-        {{ visibilidadeValores.mostrarValores ? '↓ 3,1%' : '••••' }}
+        {{ visibilidadeValores.mostrarValores
+          ? ('↓ ' + (percentualSaidasMes | number:'1.1-1') + '%')
+          : '••••' }}
       </div>
     </div>
 

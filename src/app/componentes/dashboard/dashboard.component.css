@@ -245,3 +245,9 @@
   border-color: #bfdbfe;
   background: #eff6ff;
 }
+
+.db-balance-badge.neg {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}

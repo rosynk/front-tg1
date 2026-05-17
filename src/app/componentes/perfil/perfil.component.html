@@ -1,1 +1,262 @@
-<p>perfil works!</p>
+<div class="pf-main" *ngIf="!loading; else loadingTpl">
+
+  <!-- Feedbacks -->
+  <div *ngIf="msgSucesso" class="pf-alert pf-alert-success">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
+    {{ msgSucesso }}
+  </div>
+  <div *ngIf="msgErro" class="pf-alert pf-alert-error">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+    </svg>
+    {{ msgErro }}
+  </div>
+
+  <!-- ── Hero do perfil ── -->
+  <div class="pf-hero">
+    <div class="pf-avatar-wrap">
+      <div class="pf-avatar">{{ iniciais }}</div>
+      <div class="pf-avatar-badge">
+        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="pf-hero-info">
+      <h1 class="pf-hero-name">{{ usuario?.nomeCompleto || '—' }}</h1>
+      <p class="pf-hero-sub">
+        <span class="pf-badge">{{ conta?.tipoConta }}</span>
+        <span class="pf-badge pf-badge-green">Verificado</span>
+        <span>Membro desde {{ formatarData(usuario?.dataCadastro) }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Grid de cards ── -->
+  <div class="pf-grid">
+
+    <!-- Dados pessoais (somente leitura) -->
+    <div class="pf-card">
+      <div class="pf-card-head">
+        <h2 class="pf-card-title">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Dados pessoais
+        </h2>
+        <span class="pf-card-readonly">Não editável</span>
+      </div>
+
+      <div class="pf-field-list">
+        <div class="pf-field">
+          <span class="pf-field-label">Nome completo</span>
+          <span class="pf-field-val">{{ usuario?.nomeCompleto || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">CPF</span>
+          <span class="pf-field-val mono">{{ formatarCpf(usuario?.cpf) }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Data de cadastro</span>
+          <span class="pf-field-val">{{ formatarData(usuario?.dataCadastro) }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Perfil</span>
+          <span class="pf-field-val">{{ usuario?.role === 'ROLE_CLIENTE' ? 'Cliente' : 'Administrador' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados bancários (somente leitura) -->
+    <div class="pf-card">
+      <div class="pf-card-head">
+        <h2 class="pf-card-title">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          Dados bancários
+        </h2>
+        <span class="pf-card-readonly">Não editável</span>
+      </div>
+
+      <div class="pf-field-list">
+        <div class="pf-field">
+          <span class="pf-field-label">Agência</span>
+          <span class="pf-field-val mono">{{ conta?.numeroAgencia || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Conta</span>
+          <span class="pf-field-val mono">{{ conta?.numeroConta || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Tipo</span>
+          <span class="pf-field-val">{{ conta?.tipoConta || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Status</span>
+          <span class="pf-field-val">
+            <span class="pf-status" [class.ativo]="conta?.statusConta">
+              {{ conta?.statusConta ? 'Ativa' : 'Inativa' }}
+            </span>
+          </span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Data de abertura</span>
+          <span class="pf-field-val">{{ formatarData(conta?.dataCriacao) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contato (editável) -->
+    <div class="pf-card">
+      <div class="pf-card-head">
+        <h2 class="pf-card-title">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.84a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/>
+          </svg>
+          Contato
+        </h2>
+        <button *ngIf="!editandoContato" type="button" class="pf-btn-edit" (click)="abrirEdicaoContato()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Editar
+        </button>
+      </div>
+
+      <!-- Visualização -->
+      <div *ngIf="!editandoContato" class="pf-field-list">
+        <div class="pf-field">
+          <span class="pf-field-label">E-mail</span>
+          <span class="pf-field-val">{{ usuario?.email || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Telefone</span>
+          <span class="pf-field-val mono">{{ formatarTelefone(usuario?.telefone) }}</span>
+        </div>
+      </div>
+
+      <!-- Edição -->
+      <div *ngIf="editandoContato" class="pf-form">
+        <div class="pf-input-group">
+          <label>E-mail</label>
+          <input type="email" [(ngModel)]="contatoEdit.email" placeholder="seu@email.com" />
+        </div>
+        <div class="pf-input-group">
+          <label>Telefone</label>
+          <input type="text" [(ngModel)]="contatoEdit.telefone" placeholder="11999999999" maxlength="11" />
+        </div>
+        <div class="pf-form-actions">
+          <button type="button" class="pf-btn-cancel" (click)="cancelarContato()" [disabled]="salvando">Cancelar</button>
+          <button type="button" class="pf-btn-save" (click)="salvarContato()" [disabled]="salvando">
+            {{ salvando ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Endereço (editável) -->
+    <div class="pf-card pf-card-full">
+      <div class="pf-card-head">
+        <h2 class="pf-card-title">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Endereço
+        </h2>
+        <button *ngIf="!editandoEndereco" type="button" class="pf-btn-edit" (click)="abrirEdicaoEndereco()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Editar
+        </button>
+      </div>
+
+      <!-- Visualização -->
+      <div *ngIf="!editandoEndereco" class="pf-field-list pf-field-list-row">
+        <div class="pf-field">
+          <span class="pf-field-label">Rua</span>
+          <span class="pf-field-val">{{ usuario?.endereco?.rua || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Número</span>
+          <span class="pf-field-val mono">{{ usuario?.endereco?.numero || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Complemento</span>
+          <span class="pf-field-val">{{ usuario?.endereco?.complemento || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Bairro</span>
+          <span class="pf-field-val">{{ usuario?.endereco?.bairro || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Cidade</span>
+          <span class="pf-field-val">{{ usuario?.endereco?.cidade || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">Estado</span>
+          <span class="pf-field-val">{{ usuario?.endereco?.estado || '—' }}</span>
+        </div>
+        <div class="pf-field">
+          <span class="pf-field-label">CEP</span>
+          <span class="pf-field-val mono">{{ usuario?.endereco?.cep || '—' }}</span>
+        </div>
+      </div>
+
+      <!-- Edição -->
+      <div *ngIf="editandoEndereco" class="pf-form">
+        <div class="pf-form-grid">
+          <div class="pf-input-group pf-col-3">
+            <label>Rua</label>
+            <input type="text" [(ngModel)]="enderecoEdit.rua" placeholder="Nome da rua" />
+          </div>
+          <div class="pf-input-group">
+            <label>Número</label>
+            <input type="number" [(ngModel)]="enderecoEdit.numero" placeholder="123" />
+          </div>
+          <div class="pf-input-group">
+            <label>Complemento</label>
+            <input type="text" [(ngModel)]="enderecoEdit.complemento" placeholder="Apto, bloco..." />
+          </div>
+          <div class="pf-input-group">
+            <label>Bairro</label>
+            <input type="text" [(ngModel)]="enderecoEdit.bairro" placeholder="Bairro" />
+          </div>
+          <div class="pf-input-group pf-col-2">
+            <label>Cidade</label>
+            <input type="text" [(ngModel)]="enderecoEdit.cidade" placeholder="Cidade" />
+          </div>
+          <div class="pf-input-group">
+            <label>Estado (UF)</label>
+            <input type="text" [(ngModel)]="enderecoEdit.estado" placeholder="SP" maxlength="2" />
+          </div>
+          <input type="text" [(ngModel)]="enderecoEdit.cep"
+            placeholder="00000-000" maxlength="8"
+            (blur)="buscarCep()" />
+        </div>
+        <div class="pf-form-actions">
+          <button type="button" class="pf-btn-cancel" (click)="cancelarEndereco()" [disabled]="salvando">Cancelar</button>
+          <button type="button" class="pf-btn-save" (click)="salvarEndereco()" [disabled]="salvando">
+            {{ salvando ? 'Salvando...' : 'Salvar endereço' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="pf-loading">
+    <div class="pf-spinner"></div>
+    <p>Carregando perfil...</p>
+  </div>
+</ng-template>

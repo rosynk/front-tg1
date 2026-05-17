@@ -8,6 +8,7 @@ import { ExtratoComponent } from './componentes/extrato/extrato.component'; // â
 import { authGuard } from './core/guards/auth.guard';
 import { TransferenciaPixComponent } from './componentes/transferencia-pix/transferencia-pix.component';
 import { DashboardAdmComponent } from './componentes/dashboard-adm/dashboard-adm.component';
+import { PerfilComponent } from './componentes/perfil/perfil.component';
 
 export const routes: Routes = [
   // 1. Redirecionamento Inicial
@@ -33,6 +34,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     title: 'TransferÃªncia - Bizi Bank',
     data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'], animation: 'TransferPage' }
+  },
+
+  {
+    path: 'perfil',
+    component: PerfilComponent,
+    canActivate: [authGuard],
+    title: 'Perfil - Bizi Bank',
+    data: { roles: ['ROLE_CLIENTE', 'ROLE_ADMIN'], animation: 'PerfilPage' }
   },
 
   {

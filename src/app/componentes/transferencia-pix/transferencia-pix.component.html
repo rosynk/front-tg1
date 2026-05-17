@@ -59,14 +59,33 @@
         </div>
 
         <div class="pix-input-group">
-          <label>Valor (R$)</label>
-          <input type="number" [(ngModel)]="valorPix" placeholder="0,00">
-        </div>
+        <label>Valor (R$)</label>
+        <input
+          type="text"
+          inputmode="numeric"
+          [value]="valorFormatado"
+          (input)="onDigitarValor($event)"
+          (keydown)="onTeclaValor($event)"
+          placeholder="R$ 0,00">
+      </div>
       </div>
 
       <button class="btn-bizi-primary" (click)="executarTransferencia()" [disabled]="loading">
         {{ loading ? 'Processando...' : 'Confirmar envio' }}
       </button>
+
+      <p *ngIf="erroTransferencia" class="key-error">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ erroTransferencia }}
+      </p>
+
+      <p *ngIf="sucessoTransferencia" class="key-success">
+        ✓ {{ sucessoTransferencia }}
+      </p>
     </section>
 
     <!-- 2. GERENCIAMENTO DE CHAVES -->

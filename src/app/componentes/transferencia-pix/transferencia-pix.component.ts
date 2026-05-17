@@ -30,6 +30,8 @@ export class TransferenciaPixComponent implements OnInit {
   erroChave: string = '';
   usuarioLogado: any = null;
   usuarioNome: string = '';
+  erroTransferencia: string = '';
+  sucessoTransferencia: string = '';
 
   // Variáveis para transferência
   chavePix: string = '';
@@ -161,14 +163,13 @@ export class TransferenciaPixComponent implements OnInit {
     });
   }
 
-  erroTransferencia: string = '';
-
-  executarTransferencia() {
+executarTransferencia() {
   this.erroTransferencia = '';
+  this.sucessoTransferencia = '';
 
   const payload = {
-    chavePixDestino: this.chavePix?.trim(),
-    valor: Number(this.valorPix)
+    chavePixDestino: this.chavePix?.trim(), 
+    valor: this.valorNumerico  
   };
 
   if (!payload.chavePixDestino || payload.valor <= 0) {
@@ -180,18 +181,17 @@ export class TransferenciaPixComponent implements OnInit {
 
   this.pixService.realizarTransferencia(payload).subscribe({
     next: (res: any) => {
-      console.log('Pix OK:', res);
-      alert(res?.message || 'Pix enviado!');
-
+      this.sucessoTransferencia = res?.message || 'Pix enviado com sucesso!';
       this.chavePix = '';
       this.valorPix = 0;
-
       this.carregarDados();
       this.loading = false;
+
+      setTimeout(() => { this.sucessoTransferencia = ''; }, 4000);
     },
     error: (err: any) => {
-      console.error('Erro Pix:', err);
-      this.erroTransferencia = err.error?.message || 'Erro ao realizar Pix.';
+      // O backend retorna { success: false, message: "..." }
+      this.erroTransferencia = err.error?.message || err.error?.mensagem || 'Erro ao realizar Pix. Tente novamente.';
       this.loading = false;
     }
   });
@@ -273,5 +273,44 @@ salvarNovaChave(): void {
         console.error('--- ERRO NA CHAMADA DAS CHAVES ---', err);
       }
     });
+  }
+
+  valorDigitado: string = ''; // armazena só os dígitos
+
+  get valorFormatado(): string {
+    if (!this.valorDigitado) return '';
+    const numero = parseInt(this.valorDigitado, 10) / 100;
+    return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  get valorNumerico(): number {
+    return parseInt(this.valorDigitado || '0', 10) / 100;
+  }
+
+  onDigitarValor(event: Event) {
+    const input = event.target as HTMLInputElement;
+    // Pega só os dígitos do que foi digitado
+    const apenasDigitos = input.value.replace(/\D/g, '');
+    this.valorDigitado = apenasDigitos;
+    // Força o input a mostrar o valor formatado
+    input.value = this.valorFormatado;
+  }
+
+  onTeclaValor(event: KeyboardEvent) {
+    // Permite: números, backspace, delete, tab, enter
+    const permitidas = ['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight'];
+    if (permitidas.includes(event.key)) {
+      if (event.key === 'Backspace') {
+        this.valorDigitado = this.valorDigitado.slice(0, -1);
+        const input = event.target as HTMLInputElement;
+        input.value = this.valorFormatado;
+        event.preventDefault();
+      }
+      return;
+    }
+    // Bloqueia qualquer coisa que não seja número
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
   }
 }

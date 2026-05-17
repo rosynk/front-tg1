@@ -18,6 +18,7 @@ interface Transacao {
   valor: number;
   cpfDestino?: string;
   nomeContraparte?: string;
+  tituloDinamico?: string; 
 }
 
 interface Extrato {
@@ -120,34 +121,45 @@ private buscarExtrato() {
     console.log('📋 Transações brutas:', JSON.stringify(data?.slice(0, 2))); 
     const cpfLogado = this.conta?.usuario?.cpf;
     console.log('👤 CPF logado:', cpfLogado); 
-      const transacoesFormatadas = (data || []).map((t: any) => {
-        const tipo = t.tipoTransacao || '';
-        const nome = t.nomeContraparte || t.cpfDestino || 'Destinatário';
+      
 
-        // ← Determina direção baseado no CPF, não só no tipo
-       const ehSaida = tipo.includes('SAIDA') || tipo.includes('SAQUE') || tipo.includes('PAGAMENTO');
-        const valorFinal = ehSaida ? -Math.abs(t.valor) : Math.abs(t.valor);
+     const transacoesFormatadas = (data || []).map((t: any) => {
+        console.log('TIPO BRUTO:', t.tipoTransacao); 
+        const tipo = (t.tipoTransacao || '').toUpperCase();
+      const nome = t.nomeContraparte || t.cpfDestino || 'Destinatário';
 
-        let tituloExibicao = '';
-        if (tipo.includes('PIX') || tipo.includes('ENTRADA') || tipo.includes('RECEBIDA')) {
-          tituloExibicao = ehSaida ? `Pix enviado para ${nome}` : `Pix recebido de ${nome}`;
-        } else if (tipo.includes('TED') || tipo.includes('TRANSFERENCIA')) {
-          tituloExibicao = ehSaida ? `Transferência para ${nome}` : `Transferência de ${nome}`;
-        } else if (tipo.includes('SAQUE')) {
-          tituloExibicao = 'Saque Realizado';
-        } else if (tipo.includes('DEPOSITO')) {
-          tituloExibicao = 'Depósito em Conta';
-        } else {
-          tituloExibicao = nome;
-        }
+      // O valor já vem com o sinal correto do banco — não mexer
+      const tiposDebito = [
+        'TRANSFERENCIA_ENVIADA',
+        'PIX_SAIDA',
+        'SAQUE'
+      ];
 
-        return { ...t, tituloDinamico: tituloExibicao, valor: valorFinal };
-      });
+      const valorFinal = tiposDebito.includes(tipo)
+        ? -Math.abs(t.valor)   
+        : Math.abs(t.valor);   
 
-      transacoesFormatadas.sort((a, b) =>
-        new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime()
-      );
+      let tituloExibicao = '';
+      if (tipo === 'TRANSFERENCIA_ENVIADA') {
+        tituloExibicao = `Transferência enviada para ${nome}`;
+      } else if (tipo === 'TRANSFERENCIA_RECEBIDA') {
+        tituloExibicao = `Transferência recebida de ${nome}`;
+      } else if (tipo === 'PIX_SAIDA') {
+        tituloExibicao = `Pix enviado para ${nome}`;
+      } else if (tipo === 'PIX_ENTRADA') {
+        tituloExibicao = `Pix recebido de ${nome}`;
+      } else if (tipo === 'SAQUE') {
+        tituloExibicao = 'Saque Realizado';
+      } else if (tipo === 'DEPOSITO') {
+        tituloExibicao = 'Depósito em Conta';
+      } else if (tipo === 'ESTORNO') {
+        tituloExibicao = 'Estorno';
+      } else {
+        tituloExibicao = nome;
+      }
 
+      return { ...t, tituloDinamico: tituloExibicao, valor: valorFinal };
+    });
       this.extrato = {
         titular: this.conta?.usuario?.nomeCompleto || 'Usuário Bizi',
         saldoAtual: this.conta?.saldo || 0,
@@ -237,4 +249,4 @@ private calcularPercentual(valor: number, saldo: number): number {
   if (!saldo || saldo <= 0) return 0;
   return (valor / saldo) * 100;
 }
-} // Fim da Classe
+} 

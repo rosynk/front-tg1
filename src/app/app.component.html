@@ -81,7 +81,7 @@
           </svg>
           <input type="text" placeholder="Buscar..." />
         </div>
-        <button class="db-btn-login" routerLink="/login">Entrar</button>
+        <button *ngIf="!mostrarLayout" class="db-btn-login" routerLink="/login">Entrar</button>
       </div>
     </header>
 

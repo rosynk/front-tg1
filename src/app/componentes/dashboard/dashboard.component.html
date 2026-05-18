@@ -42,12 +42,9 @@
         </svg>
 
         <ng-container *ngIf="visibilidadeValores.mostrarValores; else saldoMesOculto">
-            {{ percentualSaldoMes >= 0 ? '+' : '' }}{{ percentualSaldoMes | number:'1.1-1' }}% este mês
-          </ng-container>
-
-          <ng-template #saldoMesOculto>
-            •••• este mês
-          </ng-template>
+          {{ percentualSaldoMes >= 0 ? '+' : '' }}{{ percentualSaldoMes | number:'1.1-1' }}% este mês
+        </ng-container>
+        <ng-template #saldoMesOculto>•••• este mês</ng-template>
       </span>
 
       <div class="db-acct-info" *ngIf="conta">
@@ -92,9 +89,7 @@
 
     <div class="db-stat">
       <div class="db-stat-lbl">Transações</div>
-      <div class="db-stat-val">
-        {{ extrato?.transacoes?.length ?? '—' }}
-      </div>
+      <div class="db-stat-val">{{ extrato?.transacoes?.length ?? '—' }}</div>
       <div class="db-stat-delta">este mês</div>
     </div>
 
@@ -112,10 +107,7 @@
           </svg>
           Mais recentes
         </span>
-
-        <a routerLink="/extrato" class="db-view-all">
-          Ver todas →
-        </a>
+        <a routerLink="/extrato" class="db-view-all">Ver todas →</a>
       </div>
     </div>
 
@@ -130,7 +122,7 @@
 
     <div *ngIf="!loading && !erro" class="db-tx-list">
 
-      <div *ngFor="let tx of extrato?.transacoes" class="db-tx">
+      <div *ngFor="let tx of transacoesPaginadas" class="db-tx">
 
         <div class="db-tx-icon">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -143,25 +135,16 @@
           <p class="db-tx-title">
             {{ tx.tituloDinamico || tx.nomeContraparte || 'Destinatário' }}
           </p>
-
           <p class="db-tx-sub">
-            {{ tx.tipoTransacao }} ·
-            {{ tx.dataHora | date:'dd/MM/yyyy, HH:mm' }}
+            {{ tx.tipoTransacao }} · {{ tx.dataHora | date:'dd/MM/yyyy, HH:mm' }}
           </p>
         </div>
 
-        <span
-          class="db-tx-val"
-          [class.credit]="tx.valor > 0"
-          [class.debit]="tx.valor < 0">
-
+        <span class="db-tx-val" [class.credit]="tx.valor > 0" [class.debit]="tx.valor < 0">
           <ng-container *ngIf="visibilidadeValores.mostrarValores; else valorOculto">
             {{ tx.valor > 0 ? '+' : '' }}{{ tx.valor | currency:'BRL':'symbol':'1.2-2' }}
           </ng-container>
-
-          <ng-template #valorOculto>
-            R$ •••••
-          </ng-template>
+          <ng-template #valorOculto>R$ •••••</ng-template>
         </span>
 
       </div>
@@ -171,6 +154,36 @@
       </div>
 
     </div>
+
+    <div class="db-pagination" *ngIf="!loading && !erro && (extrato?.transacoes?.length || 0) > 0">
+      <div class="db-pagination-left">
+        <span>Rows per page</span>
+        <select (change)="mudarItensPorPagina($event)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+
+      <span class="db-pagination-info">
+        {{ (paginaAtual - 1) * itensPorPagina + 1 }}–{{ fimPagina }}
+        de {{ extrato?.transacoes?.length }}
+      </span>
+
+      <div class="db-pagination-btns">
+        <button (click)="mudarPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button (click)="mudarPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
   </div>
 
 </div>

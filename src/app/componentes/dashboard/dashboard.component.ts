@@ -249,4 +249,32 @@ private calcularPercentual(valor: number, saldo: number): number {
   if (!saldo || saldo <= 0) return 0;
   return (valor / saldo) * 100;
 }
+
+paginaAtual = 1;
+itensPorPagina = 10;
+
+get transacoesPaginadas(): Transacao[] {
+  const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+  const fim = inicio + this.itensPorPagina;
+  return (this.extrato?.transacoes || []).slice(inicio, fim);
+}
+
+get totalPaginas(): number {
+  return Math.ceil((this.extrato?.transacoes?.length || 0) / this.itensPorPagina);
+}
+
+mudarPagina(pagina: number): void {
+  if (pagina >= 1 && pagina <= this.totalPaginas) {
+    this.paginaAtual = pagina;
+  }
+}
+
+mudarItensPorPagina(event: Event): void {
+  this.itensPorPagina = Number((event.target as HTMLSelectElement).value);
+  this.paginaAtual = 1;
+}
+
+get fimPagina(): number {
+  return Math.min(this.paginaAtual * this.itensPorPagina, this.extrato?.transacoes?.length || 0);
+}
 } 

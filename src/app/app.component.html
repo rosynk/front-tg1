@@ -56,7 +56,6 @@
 
       <button class="db-btn-quick">Quick Transfer</button>
 
-      <!-- Botão Logout -->
       <button class="db-btn-logout" (click)="confirmarLogout()">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -82,7 +81,6 @@
           </svg>
           <input type="text" placeholder="Buscar..." />
         </div>
-
         <button class="db-btn-login" routerLink="/login">Entrar</button>
       </div>
     </header>
@@ -94,23 +92,62 @@
 
     <!-- ── Sidebar direita ── -->
     <aside class="db-right">
-      <p style="font-family:'Syne',sans-serif;font-weight:700;color:#0f172a;margin-bottom:8px">Ações rápidas</p>
 
-      <div class="db-invest">
-        <div class="db-invest-sub">Portfólio</div>
-        <div class="db-invest-label">Meus Investimentos</div>
-        <div class="db-invest-val">R$ 18.400,00</div>
+      <p class="db-right-title">Saldo dos últimos 7 dias</p>
+      <p class="db-right-subtitle">Variação diária da sua conta</p>
 
-        <div class="db-invest-bar-row">
-          <span>Rendimento</span>
-          <span class="db-invest-pct">+11,3%</span>
+      <div class="db-sparkline-wrap">
+        <svg viewBox="0 0 260 100" class="db-sparkline" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <path [attr.d]="sparklinePath" fill="url(#sparkGrad)"/>
+
+          <polyline
+            [attr.points]="sparklinePoints"
+            fill="none" stroke="#2563eb" stroke-width="2.5"
+            stroke-linejoin="round" stroke-linecap="round"/>
+
+          <circle
+            *ngFor="let c of sparklineCircles"
+            [attr.cx]="c.cx"
+            [attr.cy]="c.cy"
+            [attr.r]="c.ultimo ? 3.5 : 3"
+            fill="#2563eb"
+            [attr.stroke]="c.ultimo ? '#fff' : 'none'"
+            [attr.stroke-width]="c.ultimo ? 2 : 0"/>
+        </svg>
+
+        <div class="db-spark-labels">
+          <span *ngFor="let label of sparkLabels">{{ label }}</span>
         </div>
+      </div>
 
-        <div class="db-invest-track">
-          <div class="db-invest-fill"></div>
+      <div class="db-spark-stats">
+        <div class="db-spark-stat">
+          <span class="db-spark-stat-lbl">Menor saldo</span>
+          <span class="db-spark-stat-val red">
+            {{ sparkMenor | currency:'BRL':'symbol':'1.2-2' }}
+          </span>
         </div>
-
-        <button class="db-btn-optimize">Otimizar carteira →</button>
+        <div class="db-spark-stat">
+          <span class="db-spark-stat-lbl">Maior saldo</span>
+          <span class="db-spark-stat-val green">
+            {{ sparkMaior | currency:'BRL':'symbol':'1.2-2' }}
+          </span>
+        </div>
+        <div class="db-spark-stat">
+          <span class="db-spark-stat-lbl">Variação</span>
+          <span class="db-spark-stat-val"
+            [class.green]="sparkVariacao >= 0"
+            [class.red]="sparkVariacao < 0">
+            {{ sparkVariacao >= 0 ? '+' : '' }}{{ sparkVariacao | number:'1.1-1' }}%
+          </span>
+        </div>
       </div>
 
       <div class="db-vault">
@@ -120,14 +157,13 @@
           </svg>
           Kinetic Vault
         </div>
-
         <p class="db-vault-desc">Seus ativos protegidos por camadas criptográficas avançadas.</p>
-
         <div class="db-vault-status">
           <span class="db-status-lbl">Status de segurança</span>
           <span class="db-status-badge">Ativo</span>
         </div>
       </div>
+
     </aside>
 
     <!-- ── Footer ── -->
@@ -136,13 +172,11 @@
         <strong>Bizi Bank</strong>
         <small>© 2025 Bizi Bank. Regulamentado pelo Banco Central do Brasil.</small>
       </div>
-
       <div class="db-footer-col">
         <span>Plataforma</span>
         <a href="#">Privacidade</a>
         <a href="#">Termos</a>
       </div>
-
       <div class="db-footer-col">
         <span>App Mobile</span>
         <a href="#">App Store</a>
